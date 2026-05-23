@@ -123,14 +123,17 @@ app.use((req, res, next) => {
 // });
 app.use((err, req, res, next) => {
 
-    console.log("========== REAL ERROR ==========");
-    console.log(err.stack);
+    console.error(err.stack);
+
+    const { statusCode = 500 } = err;
 
     if (res.headersSent) {
         return next(err);
     }
 
-    res.status(500).send(err.stack);
+    res.status(statusCode).render("error.ejs", {
+        message: err.message || "Something went wrong!"
+    });
 });
 app.listen(8080, () => {
     console.log("Server is listening to the port 8000");
