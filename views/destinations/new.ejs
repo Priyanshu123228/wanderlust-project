@@ -1,0 +1,92 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4 mb-5">
+    <div class="col-md-8 offset-md-2">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h2 class="fw-bold mb-1">Add New Destination</h2>
+            <p class="text-muted mb-4">Introduce a new travel destination to the Wanderlust discovery platform.</p>
+
+            <form action="/destinations" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label fw-semibold">Destination Name</label>
+                        <input type="text" name="destination[name]" id="name" class="form-control rounded-3" placeholder="e.g. Manali, Goa, Jaipur" required>
+                        <div class="invalid-feedback">Please provide a valid destination name.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="location" class="form-label fw-semibold">State / Region</label>
+                        <input type="text" name="destination[location]" id="location" class="form-control rounded-3" placeholder="e.g. Himachal Pradesh, India" required>
+                        <div class="invalid-feedback">Please enter the location/state.</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="tagline" class="form-label fw-semibold">Tagline / Short Hook</label>
+                        <input type="text" name="destination[tagline]" id="tagline" class="form-control rounded-3" placeholder="e.g. The Valley of Gods & Himalayan Bliss">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea name="destination[description]" id="description" rows="4" class="form-control rounded-3" placeholder="Describe the atmosphere, highlights, landscape, and why travelers love it..." required></textarea>
+                        <div class="invalid-feedback">Please provide a description.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="bestTime" class="form-label fw-semibold">Best Time to Visit</label>
+                        <input type="text" name="destination[bestTimeToVisit]" id="bestTime" class="form-control rounded-3" placeholder="e.g. October to June">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="climate" class="form-label fw-semibold">Climate</label>
+                        <input type="text" name="destination[climate]" id="climate" class="form-control rounded-3" placeholder="e.g. Snow / Alpine / Tropical">
+                    </div>
+
+                    <!-- Budget Estimates -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Estimated Daily Cost (INR per Person)</label>
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <div class="input-group">
+                                    <span class="input-group-text">&#8377;</span>
+                                    <input type="number" name="destination[estimatedBudget][low]" class="form-control" placeholder="Low (e.g. 1500)">
+                                </div>
+                                <small class="text-muted">Budget / Hostel</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="input-group">
+                                    <span class="input-group-text">&#8377;</span>
+                                    <input type="number" name="destination[estimatedBudget][medium]" class="form-control" placeholder="Medium (e.g. 3500)">
+                                </div>
+                                <small class="text-muted">Standard Hotel</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="input-group">
+                                    <span class="input-group-text">&#8377;</span>
+                                    <input type="number" name="destination[estimatedBudget][high]" class="form-control" placeholder="High (e.g. 7500)">
+                                </div>
+                                <small class="text-muted">Luxury Resort</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="interests" class="form-label fw-semibold">Popular Interests (Comma separated)</label>
+                        <input type="text" name="destination[popularInterests]" id="interests" class="form-control rounded-3" placeholder="e.g. Adventure, Nature, Food, Shopping, Historical">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="image" class="form-label fw-semibold">Destination Cover Image</label>
+                        <input type="file" name="destination[image]" id="image" class="form-control rounded-3">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 py-2" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-plus me-1"></i> Save Destination
+                    </button>
+                    <a href="/destinations" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

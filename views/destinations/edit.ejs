@@ -1,0 +1,96 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4 mb-5">
+    <div class="col-md-8 offset-md-2">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h2 class="fw-bold mb-1">Edit Destination</h2>
+            <p class="text-muted mb-4">Update travel details and metadata for <%= destination.name %>.</p>
+
+            <form action="/destinations/<%= destination._id %>?_method=PUT" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label fw-semibold">Destination Name</label>
+                        <input type="text" name="destination[name]" id="name" value="<%= destination.name %>" class="form-control rounded-3" required>
+                        <div class="invalid-feedback">Please provide a valid destination name.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="location" class="form-label fw-semibold">State / Region</label>
+                        <input type="text" name="destination[location]" id="location" value="<%= destination.location %>" class="form-control rounded-3" required>
+                        <div class="invalid-feedback">Please enter the location/state.</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="tagline" class="form-label fw-semibold">Tagline / Short Hook</label>
+                        <input type="text" name="destination[tagline]" id="tagline" value="<%= destination.tagline %>" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea name="destination[description]" id="description" rows="4" class="form-control rounded-3" required><%= destination.description %></textarea>
+                        <div class="invalid-feedback">Please provide a description.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="bestTime" class="form-label fw-semibold">Best Time to Visit</label>
+                        <input type="text" name="destination[bestTimeToVisit]" id="bestTime" value="<%= destination.bestTimeToVisit %>" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="climate" class="form-label fw-semibold">Climate</label>
+                        <input type="text" name="destination[climate]" id="climate" value="<%= destination.climate %>" class="form-control rounded-3">
+                    </div>
+
+                    <!-- Budget Estimates -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Estimated Daily Cost (INR per Person)</label>
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <div class="input-group">
+                                    <span class="input-group-text">&#8377;</span>
+                                    <input type="number" name="destination[estimatedBudget][low]" value="<%= destination.estimatedBudget?.low || 1500 %>" class="form-control">
+                                </div>
+                                <small class="text-muted">Budget / Hostel</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="input-group">
+                                    <span class="input-group-text">&#8377;</span>
+                                    <input type="number" name="destination[estimatedBudget][medium]" value="<%= destination.estimatedBudget?.medium || 3500 %>" class="form-control">
+                                </div>
+                                <small class="text-muted">Standard Hotel</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="input-group">
+                                    <span class="input-group-text">&#8377;</span>
+                                    <input type="number" name="destination[estimatedBudget][high]" value="<%= destination.estimatedBudget?.high || 7500 %>" class="form-control">
+                                </div>
+                                <small class="text-muted">Luxury Resort</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="interests" class="form-label fw-semibold">Popular Interests (Comma separated)</label>
+                        <input type="text" name="destination[popularInterests]" id="interests" value="<%= destination.popularInterests ? destination.popularInterests.join(', ') : '' %>" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Current Cover Image</label>
+                        <div class="mb-2">
+                            <img src="<%= destination.image.url %>" alt="Current image" class="rounded-3" style="height: 120px; object-fit: cover;">
+                        </div>
+                        <label for="image" class="form-label fw-semibold">Upload New Cover Image (Optional)</label>
+                        <input type="file" name="destination[image]" id="image" class="form-control rounded-3">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-danger rounded-pill px-4 py-2" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-check me-1"></i> Update Destination
+                    </button>
+                    <a href="/destinations/<%= destination._id %>" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

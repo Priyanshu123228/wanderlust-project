@@ -23,6 +23,34 @@ const listingSchema = new mongoose.Schema({
     price: Number,
     location: String,
     country: String,
+    destination: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Destination"
+    },
+    destinationName: {
+        type: String
+    },
+    stayType: {
+        type: String,
+        enum: ["Hotel", "Resort", "Villa", "Homestay", "Hostel", "Cabin", "Apartment"],
+        default: "Hotel"
+    },
+    budgetCategory: {
+        type: String,
+        enum: ["LOW", "MEDIUM", "HIGH"],
+        default: "MEDIUM"
+    },
+    amenities: [
+        {
+            type: String
+        }
+    ],
+    rating: {
+        type: Number,
+        default: 4.5,
+        min: 1,
+        max: 5
+    },
     reviews: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -37,20 +65,27 @@ const listingSchema = new mongoose.Schema({
         type: {
             type: String,
             enum: ["Point"],
-            required: true
+            required: true,
+            default: "Point"
         },
 
         coordinates: {
             type: [Number],
-            required: true
+            required: true,
+            default: [77.1892, 32.2432]
         }
     }
 });
 
+// Virtual for pricePerNight
+listingSchema.virtual("pricePerNight").get(function() {
+    return this.price;
+});
+
 //mongoose post middleware
 listingSchema.post("findOneAndDelete", async (listing) => {
-    if (listing) {
-        await Review.deleteMany({ _id: { $in: Listing.reviews } });
+    if (listing && listing.reviews && listing.reviews.length > 0) {
+        await Review.deleteMany({ _id: { $in: listing.reviews } });
     }
 });
 

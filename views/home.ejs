@@ -1,0 +1,178 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        border-radius: 2rem;
+        color: white;
+        padding: 4.5rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero-badge {
+        background: rgba(254, 66, 77, 0.2);
+        color: #fe424d;
+        border: 1px solid rgba(254, 66, 77, 0.4);
+    }
+    .category-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 1.25rem;
+    }
+    .category-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    }
+    .destination-thumb {
+        height: 240px;
+        object-fit: cover;
+    }
+</style>
+
+<!-- Hero Banner with Prominent "Plan Your Trip" CTA -->
+<div class="hero-section text-center my-4 shadow-lg">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-12">
+            <span class="badge hero-badge px-4 py-2 rounded-pill fw-bold mb-3 fs-6">
+                <i class="fa-solid fa-compass me-1"></i> Wanderlust &bull; Travel Discovery & Smart Planner
+            </span>
+            <h1 class="display-4 fw-bold mb-3">Explore Incredible Places.<br>Plan Unforgettable Journeys.</h1>
+            <p class="lead mb-4 opacity-90" style="max-width: 650px; margin: 0 auto; font-size: 1.2rem;">
+                Discover top stays, local culinary hotspots, historical wonders, and generate full day-by-day itineraries tailored to your budget and travel style.
+            </p>
+
+            <!-- Main CTA Buttons -->
+            <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+                <a href="/itinerary/new" class="btn btn-danger btn-lg rounded-pill px-5 py-3 fw-bold shadow" style="background-color: #fe424d; border-color: #fe424d; font-size: 1.15rem;">
+                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Plan Your Trip
+                </a>
+                <a href="/destinations" class="btn btn-outline-light btn-lg rounded-pill px-4 py-3 fw-semibold">
+                    <i class="fa-solid fa-map-location-dot me-2"></i> Explore Destinations
+                </a>
+            </div>
+
+            <!-- Quick Search Bar -->
+            <div class="row justify-content-center mt-3">
+                <div class="col-md-8 col-12">
+                    <form action="/destinations" method="GET" class="d-flex bg-white rounded-pill p-1 shadow-lg">
+                        <input 
+                            type="search" 
+                            name="q" 
+                            class="form-control border-0 rounded-pill px-4 text-dark shadow-none" 
+                            placeholder="Search destination (e.g. Manali, Goa, Jaipur, Shimla...)"
+                        />
+                        <button class="btn btn-danger rounded-pill px-4 fw-semibold" type="submit" style="background-color: #fe424d; border: none;">
+                            <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4 Core Discovery Categories -->
+<div class="row row-cols-lg-4 row-cols-md-2 row-cols-1 g-3 my-4">
+    <div class="col">
+        <a href="/destinations" class="text-decoration-none">
+            <div class="card category-card border-0 shadow-sm p-4 text-center h-100 bg-white">
+                <div class="d-inline-flex p-3 rounded-circle bg-primary bg-opacity-10 text-primary mx-auto mb-3">
+                    <i class="fa-solid fa-map-location-dot fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">Destinations</h5>
+                <p class="text-muted small mb-0">Discover mountain valleys, beaches, and historic cities.</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col">
+        <a href="/listings" class="text-decoration-none">
+            <div class="card category-card border-0 shadow-sm p-4 text-center h-100 bg-white">
+                <div class="d-inline-flex p-3 rounded-circle bg-danger bg-opacity-10 text-danger mx-auto mb-3">
+                    <i class="fa-solid fa-bed fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">Stays & Villas</h5>
+                <p class="text-muted small mb-0">Unique cabins, luxury resorts, and budget hostels.</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col">
+        <a href="/restaurants" class="text-decoration-none">
+            <div class="card category-card border-0 shadow-sm p-4 text-center h-100 bg-white">
+                <div class="d-inline-flex p-3 rounded-circle bg-warning bg-opacity-10 text-warning mx-auto mb-3">
+                    <i class="fa-solid fa-utensils fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">Food & Dining</h5>
+                <p class="text-muted small mb-0">Local street foods, mountain cafes, and fine cuisine.</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col">
+        <a href="/activities" class="text-decoration-none">
+            <div class="card category-card border-0 shadow-sm p-4 text-center h-100 bg-white">
+                <div class="d-inline-flex p-3 rounded-circle bg-success bg-opacity-10 text-success mx-auto mb-3">
+                    <i class="fa-solid fa-person-hiking fa-2x"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">Adventures</h5>
+                <p class="text-muted small mb-0">Paragliding, rafting, cultural tours, and safaris.</p>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Featured Destinations Section -->
+<div class="my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Featured Travel Destinations</h3>
+            <p class="text-muted mb-0">Handpicked destinations with curated stays, food, and activities.</p>
+        </div>
+        <a href="/destinations" class="btn btn-outline-dark rounded-pill px-4">View All</a>
+    </div>
+
+    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4">
+        <% if(typeof featuredDestinations !== 'undefined' && featuredDestinations.length) { %>
+            <% for(let dest of featuredDestinations) { %>
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative category-card">
+                        <img src="<%= dest.image.url %>" class="card-img-top destination-thumb" alt="<%= dest.name %>">
+                        <span class="badge bg-danger position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill fw-bold">
+                            <i class="fa-solid fa-star me-1"></i> Top Pick
+                        </span>
+                        <div class="card-body p-4 d-flex flex-column">
+                            <h4 class="fw-bold text-dark mb-1"><%= dest.name %></h4>
+                            <p class="text-muted small mb-2"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= dest.location %></p>
+                            <p class="card-text text-secondary small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                <%= dest.description %>
+                            </p>
+                            <div class="mt-auto d-flex gap-2">
+                                <a href="/destinations/<%= dest._id %>" class="btn btn-outline-dark flex-grow-1 rounded-pill">Explore</a>
+                                <a href="/itinerary/new?destination=<%= dest.name %>" class="btn btn-danger flex-grow-1 rounded-pill" style="background-color: #fe424d; border-color: #fe424d;">
+                                    <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Plan Trip
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        <% } %>
+    </div>
+</div>
+
+<!-- Trip Planner Feature Banner -->
+<div class="card border-0 rounded-4 shadow-sm p-4 p-md-5 my-5" style="background: linear-gradient(135deg, #fe424d 0%, #ff6b6b 100%); color: white;">
+    <div class="row align-items-center">
+        <div class="col-lg-8 col-12 mb-3 mb-lg-0">
+            <h2 class="fw-bold mb-2"><i class="fa-solid fa-wand-magic-sparkles me-2"></i>How Wanderlust Smart Planner Works</h2>
+            <p class="lead mb-0 opacity-90">
+                1. Pick your destination &bull; 2. Choose days & budget &bull; 3. Select interests &bull; 4. Get a full day-by-day timetable with stays, meals, activities, and exact costs.
+            </p>
+        </div>
+        <div class="col-lg-4 col-12 text-lg-end">
+            <a href="/itinerary/new" class="btn btn-light btn-lg rounded-pill px-4 py-3 fw-bold text-danger shadow">
+                Start Planning Now <i class="fa-solid fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+</div>

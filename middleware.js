@@ -1,9 +1,7 @@
 const Listing = require("./models/listing");
 const Review =require("./models/review");
 const ExpressError = require("./utils/ExpressError.js");
-const { listingSchema } = require("./schema.js");
-
-const {reviewSchema}=require("./schema.js");
+const { listingSchema, reviewSchema, destinationSchema, restaurantSchema, attractionSchema, activitySchema } = require("./schema.js");
 
 module.exports.isLoggedIn=(req,res,next)=>{
     // console.log(req.originalUrl);
@@ -11,7 +9,7 @@ module.exports.isLoggedIn=(req,res,next)=>{
         // save original URL 
         req.session.redirectUrl = req.originalUrl;
 
-        req.flash("error","You Must Be Logged In For Creating Listings");
+        req.flash("error","You Must Be Logged In");
         return res.redirect("/login");
     }
     next();
@@ -57,6 +55,46 @@ module.exports.validateListing = (req, res, next) => {
 //joi object
 module.exports.validateReview = (req, res, next) => {
     const { error } = reviewSchema.validate(req.body);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    }
+    next();
+};
+
+//validate destination
+module.exports.validateDestination = (req, res, next) => {
+    const { error } = destinationSchema.validate(req.body);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    }
+    next();
+};
+
+//validate restaurant
+module.exports.validateRestaurant = (req, res, next) => {
+    const { error } = restaurantSchema.validate(req.body);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    }
+    next();
+};
+
+//validate attraction
+module.exports.validateAttraction = (req, res, next) => {
+    const { error } = attractionSchema.validate(req.body);
+    if (error) {
+        let errMsg = error.details.map((el) => el.message).join(",");
+        throw new ExpressError(400, errMsg);
+    }
+    next();
+};
+
+//validate activity
+module.exports.validateActivity = (req, res, next) => {
+    const { error } = activitySchema.validate(req.body);
     if (error) {
         let errMsg = error.details.map((el) => el.message).join(",");
         throw new ExpressError(400, errMsg);

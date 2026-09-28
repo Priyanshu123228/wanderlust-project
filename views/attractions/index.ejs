@@ -1,0 +1,119 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Header Banner -->
+<div class="py-4 mb-4 text-center rounded-4 shadow-sm" style="background: linear-gradient(135deg, #16a085 0%, #1abc9c 50%, #2ecc71 100%); color: white; padding: 2.5rem 1.5rem;">
+    <h1 class="fw-bold mb-2"><i class="fa-solid fa-monument me-2"></i>Iconic Attractions & Landmarks</h1>
+    <p class="lead mb-4" style="max-width: 600px; margin: 0 auto; opacity: 0.95;">
+        Explore historical monuments, sacred temples, scenic valleys, viewpoints, and cultural heritage sites.
+    </p>
+
+    <!-- Search Form -->
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <form action="/attractions" method="GET" class="d-flex bg-white rounded-pill p-1 shadow">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="<%= typeof q !== 'undefined' ? q : '' %>"
+                    class="form-control border-0 rounded-pill px-3 shadow-none" 
+                    placeholder="Search attraction, monument, or destination..."
+                >
+                <button class="btn btn-success rounded-pill px-4 text-white fw-bold" type="submit">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="bg-light p-3 rounded-4 border shadow-sm mb-4">
+    <form action="/attractions" method="GET" class="row g-2 align-items-center">
+        <div class="col-md-6 col-12">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-location-dot text-danger me-1"></i>Destination</label>
+            <select name="destination" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <option value="All" <%= (typeof selectedDestination !== 'undefined' && selectedDestination === 'All') ? 'selected' : '' %>>All Destinations</option>
+                <% if(typeof allDestinations !== 'undefined' && allDestinations.length) { %>
+                    <% for(let dest of allDestinations) { %>
+                        <option value="<%= dest.name %>" <%= (typeof selectedDestination !== 'undefined' && selectedDestination === dest.name) ? 'selected' : '' %>><%= dest.name %></option>
+                    <% } %>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="col-md-6 col-12">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-landmark text-primary me-1"></i>Category</label>
+            <% const categories = ["All", "Historical", "Spiritual", "Nature", "Scenic", "Cultural", "Viewpoint", "Architecture", "Adventure"]; %>
+            <select name="category" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <% for(let cat of categories) { %>
+                    <option value="<%= cat %>" <%= (typeof selectedCategory !== 'undefined' && selectedCategory === cat) ? 'selected' : '' %>><%= cat %></option>
+                <% } %>
+            </select>
+        </div>
+    </form>
+</div>
+
+<!-- Add Button -->
+<% if(currUser) { %>
+    <div class="d-flex justify-content-end mb-3">
+        <a href="/attractions/new" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2">
+            <i class="fa-solid fa-plus me-1"></i> Add Attraction
+        </a>
+    </div>
+<% } %>
+
+<!-- Attractions Grid -->
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4 mb-5">
+    <% if(allAttractions.length === 0) { %>
+        <div class="col-12 text-center py-5">
+            <i class="fa-solid fa-landmark-dome fa-3x text-muted mb-3"></i>
+            <h4 class="text-secondary">No attractions found</h4>
+            <p class="text-muted">Try changing your search keyword or destination.</p>
+            <a href="/attractions" class="btn btn-outline-danger rounded-pill mt-2">View All Attractions</a>
+        </div>
+    <% } %>
+
+    <% for(let attr of allAttractions) { %>
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative">
+                <img src="<%= attr.image.url %>" class="card-img-top" alt="<%= attr.name %>" style="height: 200px; object-fit: cover;">
+                
+                <span class="badge bg-dark bg-opacity-75 position-absolute top-0 start-0 m-3 px-2 py-1 rounded-pill small">
+                    <i class="fa-solid fa-location-dot me-1 text-danger"></i><%= attr.destinationName %>
+                </span>
+
+                <span class="badge bg-success position-absolute top-0 end-0 m-3 px-2 py-1 rounded-pill fw-bold small">
+                    <%= attr.category || 'Scenic' %>
+                </span>
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-baseline mb-1">
+                        <h5 class="card-title fw-bold text-dark mb-0"><%= attr.name %></h5>
+                        <small class="text-muted"><i class="fa-solid fa-star text-warning me-1"></i><%= attr.rating || 4.6 %></small>
+                    </div>
+                    
+                    <p class="text-muted small mb-2"><i class="fa-regular fa-clock me-1 text-secondary"></i><%= attr.openingHours || '09:00 AM - 06:00 PM' %> &bull; ~<%= attr.estimatedVisitDuration || 90 %> mins</p>
+                    
+                    <p class="card-text text-secondary small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        <%= attr.description %>
+                    </p>
+
+                    <!-- Price / Action Footer -->
+                    <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
+                        <div>
+                            <% if(attr.entryFee === 0) { %>
+                                <span class="badge bg-success-subtle text-success border fw-bold">Free Entry</span>
+                            <% } else { %>
+                                <span class="fw-bold text-dark">&#8377;<%= attr.entryFee.toLocaleString("en-IN") %></span>
+                                <small class="text-muted">entry</small>
+                            <% } %>
+                        </div>
+                        <a href="/attractions/<%= attr._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                            View Sight
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>

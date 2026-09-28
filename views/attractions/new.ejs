@@ -1,0 +1,91 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4 mb-5">
+    <div class="col-lg-8 offset-lg-2 col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h2 class="fw-bold mb-1">Add Landmark / Attraction</h2>
+            <p class="text-muted mb-4">Add a scenic spot, heritage monument, or cultural landmark.</p>
+
+            <form method="POST" action="/attractions" novalidate class="needs-validation" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label fw-semibold">Attraction Name</label>
+                        <input name="attraction[name]" id="name" placeholder="e.g. Hidimba Devi Temple" type="text" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="destination" class="form-label fw-semibold">Destination</label>
+                        <select name="attraction[destination]" id="destination" class="form-select rounded-3" required>
+                            <option value="">-- Select Destination --</option>
+                            <% if(typeof allDestinations !== 'undefined') { %>
+                                <% for(let dest of allDestinations) { %>
+                                    <option value="<%= dest._id %>"><%= dest.name %> (<%= dest.location %>)</option>
+                                <% } %>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="location" class="form-label fw-semibold">Address / Landmark Area</label>
+                        <input name="attraction[location]" id="location" placeholder="e.g. Hadimba Temple Rd, Old Manali, Himachal Pradesh" type="text" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea name="attraction[description]" id="description" rows="3" class="form-control rounded-3" placeholder="Describe historical context, architecture, views, entry notes..." required></textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="category" class="form-label fw-semibold">Category</label>
+                        <select name="attraction[category]" id="category" class="form-select rounded-3">
+                            <option value="Spiritual">Spiritual / Temple</option>
+                            <option value="Historical">Historical</option>
+                            <option value="Nature">Nature</option>
+                            <option value="Scenic" selected>Scenic / Valley</option>
+                            <option value="Cultural">Cultural</option>
+                            <option value="Viewpoint">Viewpoint</option>
+                            <option value="Architecture">Architecture</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="entryFee" class="form-label fw-semibold">Entry Fee (INR)</label>
+                        <input name="attraction[entryFee]" id="entryFee" placeholder="0 for free" value="0" type="number" min="0" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="duration" class="form-label fw-semibold">Visit Duration (Minutes)</label>
+                        <input name="attraction[estimatedVisitDuration]" id="duration" placeholder="90" value="90" type="number" min="15" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="hours" class="form-label fw-semibold">Opening Hours</label>
+                        <input name="attraction[openingHours]" id="hours" placeholder="08:00 AM - 06:00 PM" value="08:00 AM - 06:00 PM" type="text" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="bestTime" class="form-label fw-semibold">Best Time of Day</label>
+                        <select name="attraction[bestTimeOfDay]" id="bestTime" class="form-select rounded-3">
+                            <option value="Morning" selected>Morning</option>
+                            <option value="Afternoon">Afternoon</option>
+                            <option value="Evening">Evening / Sunset</option>
+                            <option value="Anytime">Anytime</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="image" class="form-label fw-semibold">Attraction Photo</label>
+                        <input name="attraction[image]" id="image" type="file" class="form-control rounded-3">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button class="btn btn-danger rounded-pill px-4 py-2" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-plus me-1"></i> Save Attraction
+                    </button>
+                    <a href="/attractions" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

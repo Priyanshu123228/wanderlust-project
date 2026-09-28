@@ -1,0 +1,96 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4 mb-5">
+    <div class="col-lg-8 offset-lg-2 col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h2 class="fw-bold mb-1">Add Travel Activity / Experience</h2>
+            <p class="text-muted mb-4">Add an outdoor adventure, workshop, guided tour, or unique experience.</p>
+
+            <form method="POST" action="/activities" novalidate class="needs-validation" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label fw-semibold">Activity Name</label>
+                        <input name="activity[name]" id="name" placeholder="e.g. Solang Valley Paragliding & Skiing" type="text" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="destination" class="form-label fw-semibold">Destination</label>
+                        <select name="activity[destination]" id="destination" class="form-select rounded-3" required>
+                            <option value="">-- Select Destination --</option>
+                            <% if(typeof allDestinations !== 'undefined') { %>
+                                <% for(let dest of allDestinations) { %>
+                                    <option value="<%= dest._id %>"><%= dest.name %> (<%= dest.location %>)</option>
+                                <% } %>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="location" class="form-label fw-semibold">Location / Meeting Point</label>
+                        <input name="activity[location]" id="location" placeholder="e.g. Solang Valley Ground, Manali" type="text" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea name="activity[description]" id="description" rows="3" class="form-control rounded-3" placeholder="Describe the thrill, safety gear, trainer guidance, equipment included..." required></textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="category" class="form-label fw-semibold">Interest Category</label>
+                        <% const categories = ["Adventure", "Nature", "Food", "Shopping", "Historical", "Relaxation", "Culture"]; %>
+                        <select name="activity[category]" id="category" class="form-select rounded-3">
+                            <% for(let c of categories) { %>
+                                <option value="<%= c %>"><%= c %></option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="cost" class="form-label fw-semibold">Estimated Cost (INR / person)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">&#8377;</span>
+                            <input name="activity[estimatedCost]" id="cost" placeholder="1800" type="number" min="0" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="duration" class="form-label fw-semibold">Duration (Minutes)</label>
+                        <input name="activity[duration]" id="duration" placeholder="120" value="120" type="number" min="15" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="budget" class="form-label fw-semibold">Budget Category</label>
+                        <select name="activity[budgetCategory]" id="budget" class="form-select rounded-3">
+                            <option value="LOW">Low (&#8804; &#8377;500)</option>
+                            <option value="MEDIUM" selected>Medium (&#8377;500 - &#8377;2,500)</option>
+                            <option value="HIGH">High (&#8377;2,500+)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="time" class="form-label fw-semibold">Suitable Time of Day</label>
+                        <select name="activity[suitableTimeOfDay]" id="time" class="form-select rounded-3">
+                            <option value="Morning">Morning</option>
+                            <option value="Afternoon" selected>Afternoon</option>
+                            <option value="Evening">Evening</option>
+                            <option value="Night">Night</option>
+                            <option value="Anytime">Anytime</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="image" class="form-label fw-semibold">Activity Photo</label>
+                        <input name="activity[image]" id="image" type="file" class="form-control rounded-3">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button class="btn btn-danger rounded-pill px-4 py-2" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-plus me-1"></i> Save Activity
+                    </button>
+                    <a href="/activities" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

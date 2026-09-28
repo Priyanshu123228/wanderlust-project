@@ -1,0 +1,105 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4 mb-5">
+    <div class="col-lg-8 offset-lg-2 col-12">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="position-relative">
+                <img src="<%= restaurant.image.url %>" class="w-100" style="height: 380px; object-fit: cover;" alt="<%= restaurant.name %>">
+                <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%); color: white;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="fa-solid fa-location-dot me-1"></i><%= restaurant.destinationName %></span>
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold"><i class="fa-solid fa-star me-1"></i><%= restaurant.rating %> Rating</span>
+                    </div>
+                    <h1 class="display-6 fw-bold mb-0"><%= restaurant.name %></h1>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+                    <div>
+                        <p class="text-muted mb-0"><i class="fa-solid fa-map-pin text-danger me-1"></i><%= restaurant.location %></p>
+                        <small class="text-muted"><i class="fa-regular fa-clock text-primary me-1"></i><%= restaurant.openingHours %></small>
+                    </div>
+                    <div class="text-end">
+                        <h4 class="fw-bold text-dark mb-0">&#8377;<%= restaurant.averagePrice.toLocaleString("en-IN") %> <small class="text-muted fw-normal fs-6">/ person</small></h4>
+                        <span class="badge bg-success-subtle text-success border"><%= restaurant.budgetCategory %> Budget</span>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-2">About the Dining Experience</h5>
+                <p class="text-secondary leading-relaxed" style="font-size: 1.05rem; line-height: 1.8;"><%= restaurant.description %></p>
+
+                <!-- Cuisines & Specialties -->
+                <div class="row g-3 my-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-muted small text-uppercase mb-2">Cuisines Served</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <% if(restaurant.cuisine && restaurant.cuisine.length) { %>
+                                <% for(let c of restaurant.cuisine) { %>
+                                    <span class="badge bg-light text-dark border px-3 py-2 rounded-pill"><%= c %></span>
+                                <% } %>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-muted small text-uppercase mb-2">Must Try Specialties</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <% if(restaurant.specialties && restaurant.specialties.length) { %>
+                                <% for(let s of restaurant.specialties) { %>
+                                    <span class="badge bg-warning bg-opacity-25 text-dark border px-3 py-2 rounded-pill"><i class="fa-solid fa-utensils text-warning me-1"></i><%= s %></span>
+                                <% } %>
+                            <% } else { %>
+                                <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill">Chef Specials</span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location Map -->
+                <div class="my-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Location</h5>
+                    <div id="rest-map" class="rounded-4 border shadow-sm" style="height: 300px; width: 100%;"></div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a href="/itinerary/new?destination=<%= restaurant.destinationName %>" class="btn btn-danger rounded-pill px-4" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Include in Itinerary
+                    </a>
+
+                    <% if(currUser) { %>
+                        <div class="d-flex gap-2">
+                            <a href="/restaurants/<%= restaurant._id %>/edit" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Edit</a>
+                            <form action="/restaurants/<%= restaurant._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this restaurant?');">
+                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Delete</button>
+                            </form>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const coordinates = <%- JSON.stringify(restaurant.geometry?.coordinates || [77.1892, 32.2432]) %>;
+    const mapToken = "<%= mapToken || '' %>";
+
+    if (mapToken && document.getElementById("rest-map")) {
+        mapboxgl.accessToken = mapToken;
+        const map = new mapboxgl.Map({
+            container: "rest-map",
+            style: "mapbox://styles/mapbox/streets-v12",
+            center: coordinates,
+            zoom: 12
+        });
+
+        new mapboxgl.Marker({ color: "#e67e22" })
+            .setLngLat(coordinates)
+            .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<h6><%= restaurant.name %></h6><p><%= restaurant.location %></p>`))
+            .addTo(map);
+
+        map.addControl(new mapboxgl.NavigationControl());
+    }
+</script>

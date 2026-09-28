@@ -1,122 +1,161 @@
 <% layout("/layouts/boilerplate") %>
-    <style>
-        #filters{
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .filter{
-            text-align: center;
-            margin-right: 2rem;
-            margin-top: 2rem;
-            opacity: 0.7;
-        }
-        .filter:hover{
-            opacity: 1;
-            cursor:pointer;
-        }
-        .filter p{
-            font-size: 0.8rem;
-        }
-        .tax-info{
-            display: none;
-        }
-        .tax-toggle{
-            border: 1px solid black;
-            border-radius: 1rem;
-            height: 3.2rem;
-            padding: 1rem;
-            margin-left: 2rem;
-            display: flex;
-            align-items: center;
-        }
-    </style>
 
-        <div id="filters">
-            <div class="filter">
-                <div><i class="fa-solid fa-fire"></i></div>
-                <p>Trending</p>
-            </div>
-            <div class="filter">
-                <div><i class="fa-solid fa-bed"></i></div>
-                <p>Rooms</p>
-            </div>
-            <div class="filter">
-                <div><i class="fa-solid fa-mountain-city"></i></div>
-                <p>Iconic cities</p>
-            </div>
-            <div class="filter">
-                <div><i class="fa-solid fa-mountain"></i></div>
-                <p>Mountains</p>
-            </div>
-            <div class="filter">
-                <div><i class="fa-solid fa-cash-register"></i></div>
-                <p>Castles</p>
-            </div>
-            <div class="filter">
-                <div><i class="fa-solid fa-person-swimming"></i></div>
-                <p>Amazing Pools</p>
-            </div>
-            <div class="filter">
-                <div><i class="fa-solid fa-campground"></i></div>
-                <p>Camping</p>
-            </div>
-            <div class="filter">
-                <div><i class="fa-solid fa-cow"></i></div>
-                <p>Farms</p>
-            </div>
-            <div class="filter">
-                <div><i class="fa-solid fa-snowflake"></i></div>
-                <p>Arctic</p>
-            </div>
-             <div class="filter">
-                <div><i class="fa-solid fa-cash-register"></i></div>
-                <p>Castles</p>
-            </div>
-            <div class="filter">
-                <div><i class="fa-solid fa-person-swimming"></i></div>
-                <p>Amazing Pools</p>
-            </div>
+<style>
+    .filter-bar {
+        background: #f8f9fa;
+        border-radius: 1rem;
+        padding: 1rem 1.25rem;
+    }
+    .badge-budget-low {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+    }
+    .badge-budget-medium {
+        background-color: #e3f2fd;
+        color: #1565c0;
+        border: 1px solid #bbdefb;
+    }
+    .badge-budget-high {
+        background-color: #f3e5f5;
+        color: #7b1fa2;
+        border: 1px solid #e1bee7;
+    }
+    .tax-info {
+        display: none;
+    }
+    .stay-type-badge {
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        color: white;
+    }
+</style>
 
-            <div class="tax-toggle">
-                <div class="form-check-reverse form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
-                    <label class="form-check-label" for="switchCheckDefault">Display total after taxes</label>
-                </div>
-                </div>
-            </div>
-
-        <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 mt-3">
-            <%for(let listing of allListing){%>
-                <a href="/listings/<%= listing.id %>" class="listing-link">
-                    <div class="card col listing-card">
-                        <img src=" <%= listing.image.url %>" class="card-img-top" style="height: 20rem;"
-                            alt="listing_image">
-                        <div class="card-img-overlay"></div>
-                        <div class="card-body">
-                            <p class="card-text">
-                                <b>
-                                    <%=listing.title%>
-                                </b><br>
-                                &#8377;<%= listing.price.toLocaleString("en-IN") %> /night
-                                <i class="tax-info"> &nbsp; &nbsp; +18% GST</i>
-                            </p>
-                        </div>
-                    </div>
-                </a>
-                <%}%>
+<!-- Top Filter & Search Controls -->
+<div class="filter-bar my-4 shadow-sm border">
+    <form action="/listings" method="GET" class="row g-2 align-items-center">
+        <!-- Destination Filter -->
+        <div class="col-lg-3 col-md-4 col-12">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-location-dot text-danger me-1"></i>Destination</label>
+            <select name="destination" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <option value="All" <%= (typeof selectedDestination !== 'undefined' && selectedDestination === 'All') ? 'selected' : '' %>>All Destinations</option>
+                <% if(typeof allDestinations !== 'undefined' && allDestinations.length) { %>
+                    <% for(let dest of allDestinations) { %>
+                        <option value="<%= dest.name %>" <%= (typeof selectedDestination !== 'undefined' && selectedDestination === dest.name) ? 'selected' : '' %>><%= dest.name %> (<%= dest.location %>)</option>
+                    <% } %>
+                <% } %>
+            </select>
         </div>
-    </body>
-    <script>
-        let taxSwitch=document.getElementById("switchCheckDefault");
-        taxSwitch.addEventListener("click" , ()=>{
-            let taxInfo=document.getElementsByClassName("tax-info");
-            for(info of taxInfo){
-                if(info.style.display != "inline"){
-                    info.style.display="inline";
-                }else{
-                    info.style.display="none";
+
+        <!-- Stay Type Filter -->
+        <div class="col-lg-3 col-md-4 col-6">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-house text-primary me-1"></i>Stay Type</label>
+            <% const stayTypes = ["All", "Hotel", "Resort", "Villa", "Homestay", "Hostel", "Cabin", "Apartment"]; %>
+            <select name="stayType" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <% for(let st of stayTypes) { %>
+                    <option value="<%= st %>" <%= (typeof selectedStayType !== 'undefined' && selectedStayType === st) ? 'selected' : '' %>><%= st %></option>
+                <% } %>
+            </select>
+        </div>
+
+        <!-- Budget Category Filter -->
+        <div class="col-lg-3 col-md-4 col-6">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-wallet text-success me-1"></i>Budget Tier</label>
+            <select name="budget" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <option value="All" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'All') ? 'selected' : '' %>>All Budgets</option>
+                <option value="LOW" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'LOW') ? 'selected' : '' %>>Low (&#8804; &#8377;2,000)</option>
+                <option value="MEDIUM" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'MEDIUM') ? 'selected' : '' %>>Medium (&#8377;2,000 - &#8377;5,500)</option>
+                <option value="HIGH" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'HIGH') ? 'selected' : '' %>>High (&#8377;5,500+)</option>
+            </select>
+        </div>
+
+        <!-- Tax toggle & Reset button -->
+        <div class="col-lg-3 col-12 d-flex align-items-center justify-content-between pt-md-3">
+            <div class="form-check form-switch ms-2">
+                <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+                <label class="form-check-label small" for="switchCheckDefault">Total + GST</label>
+            </div>
+            <% if((typeof selectedDestination !== 'undefined' && selectedDestination !== 'All') || (typeof selectedBudget !== 'undefined' && selectedBudget !== 'All') || (typeof selectedStayType !== 'undefined' && selectedStayType !== 'All')) { %>
+                <a href="/listings" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="fa-solid fa-rotate-left me-1"></i> Reset
+                </a>
+            <% } %>
+        </div>
+    </form>
+</div>
+
+<!-- Header / Result count -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0 text-dark">
+        <% if(typeof selectedDestination !== 'undefined' && selectedDestination !== 'All') { %>
+            Stays in <%= selectedDestination %>
+        <% } else { %>
+            Explore All Stays & Accommodations
+        <% } %>
+        <span class="text-muted small fw-normal ms-1">(<%= allListing.length %> places found)</span>
+    </h5>
+</div>
+
+<!-- Listings Grid -->
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4 mb-5">
+    <% if(allListing.length === 0) { %>
+        <div class="col-12 text-center py-5">
+            <i class="fa-solid fa-bed fa-3x text-muted mb-3"></i>
+            <h4 class="text-secondary">No stays match your criteria</h4>
+            <p class="text-muted">Try adjusting your filters or destination.</p>
+            <a href="/listings" class="btn btn-outline-danger rounded-pill mt-2">Reset Filters</a>
+        </div>
+    <% } %>
+
+    <% for(let listing of allListing) { %>
+        <div class="col">
+            <a href="/listings/<%= listing.id %>" class="listing-link">
+                <div class="card h-100 listing-card border-0 shadow-sm rounded-4 overflow-hidden position-relative">
+                    <div class="position-relative">
+                        <img src="<%= listing.image.url %>" class="card-img-top" style="height: 18rem; object-fit: cover;" alt="<%= listing.title %>">
+                        
+                        <!-- Stay Type Badge -->
+                        <span class="badge stay-type-badge position-absolute top-0 start-0 m-3 px-2 py-1 rounded-pill small">
+                            <i class="fa-solid fa-hotel me-1"></i><%= listing.stayType || 'Hotel' %>
+                        </span>
+
+                        <!-- Budget Category Badge -->
+                        <% let budgetCat = listing.budgetCategory || (listing.price <= 2000 ? 'LOW' : (listing.price <= 5500 ? 'MEDIUM' : 'HIGH')); %>
+                        <span class="badge badge-budget-<%= budgetCat.toLowerCase() %> position-absolute top-0 end-0 m-3 px-2 py-1 rounded-pill small fw-bold">
+                            <%= budgetCat %>
+                        </span>
+                    </div>
+
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-baseline mb-1">
+                            <h6 class="card-title fw-bold text-dark text-truncate mb-0" style="max-width: 75%;"><%= listing.title %></h6>
+                            <span class="small text-muted"><i class="fa-solid fa-star text-warning me-1"></i><%= listing.rating || 4.5 %></span>
+                        </div>
+                        <p class="text-muted small mb-2"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= listing.location %>, <%= listing.country %></p>
+                        
+                        <p class="card-text text-dark mb-0">
+                            <b>&#8377;<%= listing.price.toLocaleString("en-IN") %></b> <span class="text-muted small">/ night</span>
+                            <i class="tax-info text-danger small"> &nbsp;+18% GST</i>
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    <% } %>
+</div>
+
+<script>
+    let taxSwitch = document.getElementById("switchCheckDefault");
+    if (taxSwitch) {
+        taxSwitch.addEventListener("click", () => {
+            let taxInfo = document.getElementsByClassName("tax-info");
+            for (let info of taxInfo) {
+                if (info.style.display !== "inline") {
+                    info.style.display = "inline";
+                } else {
+                    info.style.display = "none";
                 }
             }
-        })
-    </script>
+        });
+    }
+</script>

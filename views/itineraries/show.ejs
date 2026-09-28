@@ -1,0 +1,260 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .timeline-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background-color: #fe424d;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #fe424d;
+    }
+    .timeline-card {
+        border-left: 2px dashed #ddd;
+        position: relative;
+        padding-left: 1.5rem;
+    }
+    .cost-card {
+        border-radius: 1.25rem;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+    }
+    .slot-badge-morning { background-color: #fff3cd; color: #856404; }
+    .slot-badge-lunch { background-color: #ffeeba; color: #856404; }
+    .slot-badge-afternoon { background-color: #d1ecf1; color: #0c5460; }
+    .slot-badge-evening { background-color: #f8d7da; color: #721c24; }
+    .slot-badge-dinner { background-color: #e2e3e5; color: #383d41; }
+    .slot-badge-stay { background-color: #d4edda; color: #155724; }
+</style>
+
+<div class="row mt-4 mb-5">
+    <!-- Left Column: Itinerary Details -->
+    <div class="col-lg-8 col-12">
+        <!-- Trip Banner -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4" style="background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%); color: white;">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <span class="badge bg-success rounded-pill px-3 py-2 mb-2"><i class="fa-solid fa-circle-check me-1"></i><%= itinerary.status || 'Saved Itinerary' %></span>
+                    <h2 class="fw-bold mb-1"><%= itinerary.title %></h2>
+                    <p class="mb-2 opacity-90"><i class="fa-solid fa-location-dot me-1 text-danger"></i><%= itinerary.destinationName %></p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-light text-dark px-3 py-2 rounded-pill fw-bold"><%= itinerary.budgetTier %> Budget</span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-2 pt-2 border-top border-light border-opacity-25">
+                <span class="badge bg-white bg-opacity-20 px-3 py-2 rounded-pill"><i class="fa-regular fa-calendar me-1"></i><%= itinerary.durationDays %> Days</span>
+                <span class="badge bg-white bg-opacity-20 px-3 py-2 rounded-pill"><i class="fa-solid fa-users me-1"></i><%= itinerary.numTravelers %> Travelers</span>
+                <% if(itinerary.interests && itinerary.interests.length) { %>
+                    <% for(let interest of itinerary.interests) { %>
+                        <span class="badge bg-white bg-opacity-20 px-3 py-2 rounded-pill"><i class="fa-solid fa-hashtag me-1"></i><%= interest %></span>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Custom Notes if present -->
+        <% if(itinerary.customNotes) { %>
+            <div class="card border-0 bg-warning bg-opacity-10 border-start border-4 border-warning rounded-3 p-3 mb-4">
+                <h6 class="fw-bold mb-1 text-dark"><i class="fa-regular fa-note-sticky text-warning me-2"></i>Trip Notes</h6>
+                <p class="text-secondary small mb-0"><%= itinerary.customNotes %></p>
+            </div>
+        <% } %>
+
+        <!-- Day by Day Content -->
+        <div class="mb-4">
+            <h4 class="fw-bold mb-3"><i class="fa-solid fa-route text-danger me-2"></i>Day-by-Day Schedule</h4>
+
+            <% for(let day of itinerary.dailyPlan) { %>
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-header bg-dark text-white p-3 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0"><i class="fa-regular fa-sun text-warning me-2"></i>Day <%= day.dayNumber %></h5>
+                        <small class="text-light opacity-75"><%= day.morning.title %></small>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <!-- Morning -->
+                        <div class="timeline-card pb-4">
+                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1"></div>
+                            <span class="badge slot-badge-morning px-2 py-1 rounded-pill small fw-bold">MORNING &bull; <%= day.morning.time %></span>
+                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.morning.title %></h6>
+                            <p class="text-secondary small mb-1"><%= day.morning.description %></p>
+                            <div class="small text-muted">
+                                <i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.morning.location %>
+                                <% if(day.morning.estimatedCost > 0) { %>
+                                    &bull; <span class="fw-semibold text-dark">&#8377;<%= day.morning.estimatedCost.toLocaleString("en-IN") %> entry</span>
+                                <% } else { %>
+                                    &bull; <span class="badge bg-success-subtle text-success">Free Entry</span>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <!-- Lunch -->
+                        <div class="timeline-card pb-4">
+                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #f39c12; box-shadow: 0 0 0 2px #f39c12;"></div>
+                            <span class="badge slot-badge-lunch px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-utensils me-1"></i>LUNCH &bull; <%= day.lunch.time %></span>
+                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.lunch.title %></h6>
+                            <p class="text-secondary small mb-1">Cuisine: <strong><%= day.lunch.cuisine %></strong> &bull; Avg. &#8377;<%= day.lunch.estimatedCost.toLocaleString("en-IN") %>/person</p>
+                            <small class="text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.lunch.location %></small>
+                        </div>
+
+                        <!-- Afternoon -->
+                        <div class="timeline-card pb-4">
+                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #8e44ad; box-shadow: 0 0 0 2px #8e44ad;"></div>
+                            <span class="badge slot-badge-afternoon px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-person-hiking me-1"></i>AFTERNOON &bull; <%= day.afternoon.time %></span>
+                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.afternoon.title %></h6>
+                            <p class="text-secondary small mb-1"><%= day.afternoon.description %></p>
+                            <div class="small text-muted">
+                                <i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.afternoon.location %>
+                                &bull; <span class="fw-semibold text-dark">&#8377;<%= day.afternoon.estimatedCost.toLocaleString("en-IN") %> /person</span>
+                            </div>
+                        </div>
+
+                        <!-- Evening -->
+                        <div class="timeline-card pb-4">
+                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #e74c3c; box-shadow: 0 0 0 2px #e74c3c;"></div>
+                            <span class="badge slot-badge-evening px-2 py-1 rounded-pill small fw-bold"><i class="fa-regular fa-moon me-1"></i>EVENING &bull; <%= day.evening.time %></span>
+                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.evening.title %></h6>
+                            <p class="text-secondary small mb-1"><%= day.evening.description %></p>
+                            <small class="text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.evening.location %></small>
+                        </div>
+
+                        <!-- Dinner -->
+                        <div class="timeline-card pb-4">
+                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #34495e; box-shadow: 0 0 0 2px #34495e;"></div>
+                            <span class="badge slot-badge-dinner px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-wine-glass me-1"></i>DINNER &bull; <%= day.dinner.time %></span>
+                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.dinner.title %></h6>
+                            <p class="text-secondary small mb-1">Cuisine: <strong><%= day.dinner.cuisine %></strong> &bull; Avg. &#8377;<%= day.dinner.estimatedCost.toLocaleString("en-IN") %>/person</p>
+                            <small class="text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.dinner.location %></small>
+                        </div>
+
+                        <!-- Night Stay -->
+                        <div class="timeline-card">
+                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #27ae60; box-shadow: 0 0 0 2px #27ae60;"></div>
+                            <span class="badge slot-badge-stay px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-bed me-1"></i>NIGHT STAY</span>
+                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.nightStay.title %></h6>
+                            <p class="text-muted small mb-0"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.nightStay.location %> &bull; &#8377;<%= day.nightStay.pricePerNight.toLocaleString("en-IN") %> /night</p>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Map Section -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Trip Route Map</h5>
+            <div id="itinerary-map" class="rounded-4 border" style="height: 380px; width: 100%;"></div>
+        </div>
+
+        <!-- Action Footer -->
+        <% if(currUser && itinerary.user && currUser._id.equals(itinerary.user._id)) { %>
+            <div class="d-flex gap-2 pt-3 border-top mb-5">
+                <a href="/itinerary/<%= itinerary._id %>/edit" class="btn btn-outline-dark rounded-pill px-4">
+                    <i class="fa-solid fa-pen me-1"></i> Edit Trip
+                </a>
+                <form action="/itinerary/<%= itinerary._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this saved trip?');">
+                    <button class="btn btn-outline-danger rounded-pill px-4">
+                        <i class="fa-solid fa-trash me-1"></i> Delete Trip
+                    </button>
+                </form>
+                <button onclick="window.print()" class="btn btn-outline-secondary rounded-pill px-4 ms-auto">
+                    <i class="fa-solid fa-print me-1"></i> Print / Save PDF
+                </button>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- Right Column: Budget Breakdown -->
+    <div class="col-lg-4 col-12">
+        <div class="sticky-top" style="top: 6rem;">
+            <div class="card cost-card border-0 shadow-lg p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-white text-dark px-3 py-2 rounded-pill fw-bold"><i class="fa-solid fa-calculator me-1"></i>Budget Summary</span>
+                    <small class="opacity-75"><%= itinerary.numTravelers %> travelers &bull; <%= itinerary.durationDays %> days</small>
+                </div>
+
+                <div class="text-center my-3 pb-3 border-bottom border-light border-opacity-25">
+                    <small class="text-uppercase tracking-wider opacity-75">Estimated Total Trip Cost</small>
+                    <h1 class="display-5 fw-bold mb-0">&#8377;<%= itinerary.costBreakdown.grandTotal.toLocaleString("en-IN") %></h1>
+                    <small class="opacity-75">(&#8377;<%= Math.round(itinerary.costBreakdown.grandTotal / itinerary.numTravelers).toLocaleString("en-IN") %> per person)</small>
+                </div>
+
+                <!-- Detailed Breakdown Items -->
+                <div class="d-flex flex-column gap-2 text-white small mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fa-solid fa-bed text-warning me-2"></i>Accommodation (<%= itinerary.durationDays > 1 ? itinerary.durationDays - 1 : 1 %> nights)</span>
+                        <strong class="fs-6">&#8377;<%= itinerary.costBreakdown.stayTotal.toLocaleString("en-IN") %></strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fa-solid fa-utensils text-info me-2"></i>Meals & Dining</span>
+                        <strong class="fs-6">&#8377;<%= itinerary.costBreakdown.foodTotal.toLocaleString("en-IN") %></strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fa-solid fa-person-hiking text-success me-2"></i>Activities & Sports</span>
+                        <strong class="fs-6">&#8377;<%= itinerary.costBreakdown.activitiesTotal.toLocaleString("en-IN") %></strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fa-solid fa-ticket text-danger me-2"></i>Attraction Entry Fees</span>
+                        <strong class="fs-6">&#8377;<%= itinerary.costBreakdown.entryFeesTotal.toLocaleString("en-IN") %></strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fa-solid fa-taxi text-light me-2"></i>Estimated Local Transit</span>
+                        <strong class="fs-6">&#8377;<%= itinerary.costBreakdown.estimatedTransportation.toLocaleString("en-IN") %></strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h6 class="fw-bold mb-3">Quick Navigation</h6>
+                <div class="d-flex flex-column gap-2">
+                    <a href="/itinerary/my-trips" class="btn btn-outline-dark rounded-pill w-100">
+                        <i class="fa-regular fa-bookmark me-1"></i> Back to My Trips
+                    </a>
+                    <a href="/itinerary/new" class="btn btn-danger rounded-pill w-100" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Plan Another Trip
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const mapToken = "<%= mapToken || '' %>";
+    const dailyPlan = <%- JSON.stringify(itinerary.dailyPlan) %>;
+
+    if (mapToken && document.getElementById("itinerary-map")) {
+        mapboxgl.accessToken = mapToken;
+        
+        let centerCoordinates = [77.1892, 32.2432];
+        if (dailyPlan.length > 0 && dailyPlan[0].morning.coordinates) {
+            centerCoordinates = dailyPlan[0].morning.coordinates;
+        }
+
+        const map = new mapboxgl.Map({
+            container: "itinerary-map",
+            style: "mapbox://styles/mapbox/streets-v12",
+            center: centerCoordinates,
+            zoom: 11
+        });
+
+        dailyPlan.forEach((day) => {
+            if (day.morning.coordinates && day.morning.coordinates.length === 2) {
+                new mapboxgl.Marker({ color: "#fe424d" })
+                    .setLngLat(day.morning.coordinates)
+                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>Day ${day.dayNumber} (Morning)</strong><p>${day.morning.title}</p>`))
+                    .addTo(map);
+            }
+            if (day.afternoon.coordinates && day.afternoon.coordinates.length === 2) {
+                new mapboxgl.Marker({ color: "#8e44ad" })
+                    .setLngLat(day.afternoon.coordinates)
+                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>Day ${day.dayNumber} (Afternoon)</strong><p>${day.afternoon.title}</p>`))
+                    .addTo(map);
+            }
+        });
+
+        map.addControl(new mapboxgl.NavigationControl());
+    }
+</script>

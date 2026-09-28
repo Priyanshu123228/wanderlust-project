@@ -1,48 +1,102 @@
 <% layout("/layouts/boilerplate") %>
-<div class="row mt-3">
- <div class="col-8 offset-2 ">
-<h3>Create a new Listing</h3>
-<br>
-<body>
-    <form method="POST" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="title" class="form-label">Title</label>
-            <input name="listing[title]" placeholder="Add a catchy title " type="text" class="form-control" required>
-            <div class="valid-feedback">Title looks Good</div>
+
+<div class="row mt-4 mb-5">
+    <div class="col-lg-8 offset-lg-2 col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h2 class="fw-bold mb-1">List Your Stay / Property</h2>
+            <p class="text-muted mb-4">Add your accommodation to Wanderlust for travelers to discover and book.</p>
+
+            <form method="POST" action="/listings" novalidate class="needs-validation" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="title" class="form-label fw-semibold">Title / Property Name</label>
+                        <input name="listing[title]" id="title" placeholder="e.g. Pine Ridge Luxury Mountain Villa" type="text" class="form-control rounded-3" required>
+                        <div class="invalid-feedback">Please enter a catchy title.</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea name="listing[description]" id="description" rows="4" class="form-control rounded-3" placeholder="Describe the space, views, rooms, and guest experience..." required></textarea>
+                        <div class="invalid-feedback">Please provide a description.</div>
+                    </div>
+
+                    <!-- Destination & Stay Type -->
+                    <div class="col-md-6">
+                        <label for="destination" class="form-label fw-semibold">Associated Destination (Optional)</label>
+                        <select name="listing[destination]" id="destination" class="form-select rounded-3">
+                            <option value="">-- Select Destination (or enter custom location below) --</option>
+                            <% if(typeof allDestinations !== 'undefined' && allDestinations.length) { %>
+                                <% for(let dest of allDestinations) { %>
+                                    <option value="<%= dest._id %>"><%= dest.name %> (<%= dest.location %>)</option>
+                                <% } %>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="stayType" class="form-label fw-semibold">Stay Type</label>
+                        <select name="listing[stayType]" id="stayType" class="form-select rounded-3">
+                            <option value="Hotel">Hotel</option>
+                            <option value="Resort">Resort</option>
+                            <option value="Villa">Villa</option>
+                            <option value="Homestay">Homestay</option>
+                            <option value="Hostel">Hostel / Backpacker</option>
+                            <option value="Cabin">Cabin / Cottage</option>
+                            <option value="Apartment">Apartment</option>
+                        </select>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="col-12">
+                        <label for="image" class="form-label fw-semibold">Property Image</label>
+                        <input name="listing[image]" id="image" type="file" class="form-control rounded-3" required>
+                        <div class="invalid-feedback">Please upload a photo of your property.</div>
+                    </div>
+
+                    <!-- Pricing & Budget Tier -->
+                    <div class="col-md-4">
+                        <label for="price" class="form-label fw-semibold">Price per Night (INR)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">&#8377;</span>
+                            <input name="listing[price]" id="price" placeholder="e.g. 3500" type="number" min="1" class="form-control rounded-end-3" required>
+                        </div>
+                        <div class="invalid-feedback">Please enter a valid price.</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="budgetCategory" class="form-label fw-semibold">Budget Category</label>
+                        <select name="listing[budgetCategory]" id="budgetCategory" class="form-select rounded-3">
+                            <option value="LOW">Low (Budget / Hostel)</option>
+                            <option value="MEDIUM" selected>Medium (Standard / Boutique)</option>
+                            <option value="HIGH">High (Luxury / Premium)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="country" class="form-label fw-semibold">Country</label>
+                        <input name="listing[country]" id="country" placeholder="e.g. India" value="India" type="text" class="form-control rounded-3" required>
+                        <div class="invalid-feedback">Please specify the country.</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="location" class="form-label fw-semibold">City / Location</label>
+                        <input name="listing[location]" id="location" placeholder="e.g. Old Manali, Himachal Pradesh" type="text" class="form-control rounded-3" required>
+                        <div class="invalid-feedback">Location is required for map geocoding.</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="amenities" class="form-label fw-semibold">Amenities (Comma separated)</label>
+                        <input name="listing[amenities]" id="amenities" placeholder="e.g. WiFi, Air Conditioning, Mountain View, Breakfast, Free Parking, Swimming Pool" type="text" class="form-control rounded-3">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button class="btn btn-danger rounded-pill px-4 py-2" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-plus me-1"></i> Add Stay
+                    </button>
+                    <a href="/listings" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+                </div>
+            </form>
         </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <textarea name="listing[description]"  class="form-control" required></textarea>
-            <div class="invalid-feedback">Please Enter Short Description</div>
-        </div>
-    
-        <div class="mb-3">
-            <label for="image" class="form-label">Upload Image Listing</label>
-            <input name="listing[image]" type="file" class="form-control" required>
-        </div>
-        
-        <div class="row">
-            <div class="mb-3 col-md-4">
-                <label for="price" class="form-label">Price</label>
-                <input name="listing[price]" placeholder="Enter price"  class="form-control" required>
-                <div class="invalid-feedback">Price Should be valid</div>
-             </div>
-    
-            <div class="mb-3 col-md-8">
-                <label for="country" class="form-label">Country</label>
-                <input name="listing[country]" placeholder="Enter country" type="text" class="form-control" required>
-                <div class="invalid-feedback">country Should be valid</div>
-            </div>
-        </div>
-        
-         <div class="mb-3">
-            <label for="location" class="form-label">Location</label>
-            <input name="listing[location]" placeholder="Enter location" type="text" class="form-control" required>
-            <div class="invalid-feedback">Location Should be valid</div>
-        </div>
-    
-        <button class="btn btn-dark add-btn mt-3">Add</button>
-        
-    </form>
- </div>
+    </div>
 </div>

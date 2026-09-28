@@ -1,0 +1,131 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Header Banner -->
+<div class="py-4 mb-4 text-center rounded-4 shadow-sm" style="background: linear-gradient(135deg, #d35400 0%, #e67e22 50%, #f39c12 100%); color: white; padding: 2.5rem 1.5rem;">
+    <h1 class="fw-bold mb-2"><i class="fa-solid fa-utensils me-2"></i>Food, Dining & Local Cafes</h1>
+    <p class="lead mb-4" style="max-width: 600px; margin: 0 auto; opacity: 0.95;">
+        Discover authentic local flavors, iconic eateries, mountain cafes, and fine dining across your favorite destinations.
+    </p>
+
+    <!-- Search Form -->
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <form action="/restaurants" method="GET" class="d-flex bg-white rounded-pill p-1 shadow">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="<%= typeof q !== 'undefined' ? q : '' %>"
+                    class="form-control border-0 rounded-pill px-3 shadow-none" 
+                    placeholder="Search restaurant, cuisine, or location..."
+                >
+                <button class="btn btn-warning rounded-pill px-4 text-dark fw-bold" type="submit">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="bg-light p-3 rounded-4 border shadow-sm mb-4">
+    <form action="/restaurants" method="GET" class="row g-2 align-items-center">
+        <div class="col-md-4 col-12">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-location-dot text-danger me-1"></i>Destination</label>
+            <select name="destination" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <option value="All" <%= (typeof selectedDestination !== 'undefined' && selectedDestination === 'All') ? 'selected' : '' %>>All Destinations</option>
+                <% if(typeof allDestinations !== 'undefined' && allDestinations.length) { %>
+                    <% for(let dest of allDestinations) { %>
+                        <option value="<%= dest.name %>" <%= (typeof selectedDestination !== 'undefined' && selectedDestination === dest.name) ? 'selected' : '' %>><%= dest.name %></option>
+                    <% } %>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="col-md-4 col-6">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-bowl-food text-warning me-1"></i>Cuisine</label>
+            <% const cuisines = ["All", "North Indian", "South Indian", "Tibetan", "Seafood", "Cafe", "Street Food", "Continental", "Italian"]; %>
+            <select name="cuisine" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <% for(let c of cuisines) { %>
+                    <option value="<%= c %>" <%= (typeof selectedCuisine !== 'undefined' && selectedCuisine === c) ? 'selected' : '' %>><%= c %></option>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="col-md-4 col-6">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-wallet text-success me-1"></i>Budget Tier</label>
+            <select name="budget" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <option value="All" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'All') ? 'selected' : '' %>>All Budgets</option>
+                <option value="LOW" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'LOW') ? 'selected' : '' %>>Low (&#8377;100 - &#8377;300 / person)</option>
+                <option value="MEDIUM" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'MEDIUM') ? 'selected' : '' %>>Medium (&#8377;300 - &#8377;700 / person)</option>
+                <option value="HIGH" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'HIGH') ? 'selected' : '' %>>High (&#8377;700+ / person)</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<!-- Add Restaurant Button if logged in -->
+<% if(currUser) { %>
+    <div class="d-flex justify-content-end mb-3">
+        <a href="/restaurants/new" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2">
+            <i class="fa-solid fa-plus me-1"></i> Add Restaurant
+        </a>
+    </div>
+<% } %>
+
+<!-- Restaurants Grid -->
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4 mb-5">
+    <% if(allRestaurants.length === 0) { %>
+        <div class="col-12 text-center py-5">
+            <i class="fa-solid fa-utensils fa-3x text-muted mb-3"></i>
+            <h4 class="text-secondary">No restaurants found</h4>
+            <p class="text-muted">Try a different search keyword or filter.</p>
+            <a href="/restaurants" class="btn btn-outline-danger rounded-pill mt-2">View All Restaurants</a>
+        </div>
+    <% } %>
+
+    <% for(let rest of allRestaurants) { %>
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative">
+                <img src="<%= rest.image.url %>" class="card-img-top" alt="<%= rest.name %>" style="height: 200px; object-fit: cover;">
+                
+                <span class="badge bg-dark bg-opacity-75 position-absolute top-0 start-0 m-3 px-2 py-1 rounded-pill small">
+                    <i class="fa-solid fa-location-dot me-1 text-danger"></i><%= rest.destinationName %>
+                </span>
+
+                <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 px-2 py-1 rounded-pill fw-bold small">
+                    <i class="fa-solid fa-star me-1"></i><%= rest.rating || 4.5 %>
+                </span>
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <h5 class="card-title fw-bold text-dark mb-1"><%= rest.name %></h5>
+                    <p class="text-muted small mb-2"><i class="fa-regular fa-clock me-1 text-secondary"></i><%= rest.openingHours || '10:00 AM - 10:30 PM' %></p>
+                    
+                    <p class="card-text text-secondary small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        <%= rest.description %>
+                    </p>
+
+                    <!-- Cuisines -->
+                    <div class="mb-3">
+                        <% if(rest.cuisine && rest.cuisine.length) { %>
+                            <% for(let c of rest.cuisine.slice(0, 3)) { %>
+                                <span class="badge bg-light text-secondary border me-1"><%= c %></span>
+                            <% } %>
+                        <% } %>
+                    </div>
+
+                    <!-- Price / Budget Footer -->
+                    <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
+                        <div>
+                            <span class="fw-bold text-dark">&#8377;<%= rest.averagePrice.toLocaleString("en-IN") %></span>
+                            <small class="text-muted">/ person</small>
+                            <span class="badge bg-secondary-subtle text-secondary border ms-1 small"><%= rest.budgetCategory %></span>
+                        </div>
+                        <a href="/restaurants/<%= rest._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>

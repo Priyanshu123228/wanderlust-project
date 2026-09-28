@@ -1,0 +1,179 @@
+<% layout("/layouts/boilerplate") %>
+
+<style>
+    .planner-card {
+        border-radius: 1.5rem;
+        background: white;
+    }
+    .interest-checkbox:checked + .interest-label {
+        background-color: #fe424d !important;
+        color: white !important;
+        border-color: #fe424d !important;
+        box-shadow: 0 4px 12px rgba(254, 66, 77, 0.3);
+    }
+    .budget-radio:checked + .budget-card {
+        border-color: #fe424d !important;
+        background-color: #fff5f5 !important;
+        box-shadow: 0 4px 15px rgba(254, 66, 77, 0.15);
+    }
+</style>
+
+<div class="row mt-4 mb-5">
+    <div class="col-lg-8 offset-lg-2 col-12">
+        <!-- Hero Header -->
+        <div class="text-center mb-4">
+            <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill fw-bold mb-2">
+                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Wanderlust Smart Planner
+            </span>
+            <h1 class="fw-bold display-6 mb-2">Plan Your Dream Journey</h1>
+            <p class="text-muted" style="max-width: 550px; margin: 0 auto;">
+                Tell us where you want to go and how you like to travel. Our recommendation engine will craft an optimized day-by-day itinerary and accurate budget breakdown.
+            </p>
+        </div>
+
+        <div class="card planner-card border-0 shadow-lg p-4 p-md-5">
+            <form action="/itinerary/generate" method="POST" class="needs-validation" novalidate>
+                
+                <!-- 1. Destination Selection -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold h6 text-dark mb-2">
+                        <i class="fa-solid fa-location-dot text-danger me-2"></i>1. Where do you want to go?
+                    </label>
+                    <select name="destinationName" class="form-select form-select-lg rounded-3 shadow-none" required>
+                        <option value="">-- Choose a Destination --</option>
+                        <% if(typeof allDestinations !== 'undefined') { %>
+                            <% for(let dest of allDestinations) { %>
+                                <option value="<%= dest.name %>" <%= (prefilledDestination && prefilledDestination.toLowerCase() === dest.name.toLowerCase()) ? 'selected' : '' %>>
+                                    <%= dest.name %> &bull; <%= dest.location %> (<%= dest.bestTimeToVisit %>)
+                                </option>
+                            <% } %>
+                        <% } %>
+                    </select>
+                    <div class="invalid-feedback">Please select a destination.</div>
+                </div>
+
+                <!-- 2. Trip Duration & Travelers -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold h6 text-dark mb-2">
+                            <i class="fa-regular fa-calendar text-primary me-2"></i>2. Trip Duration (Days)
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <input 
+                                type="number" 
+                                name="durationDays" 
+                                id="durationInput" 
+                                value="3" 
+                                min="1" 
+                                max="14" 
+                                class="form-control rounded-3" 
+                                required
+                            >
+                            <span class="input-group-text bg-light text-muted">Days</span>
+                        </div>
+                        <small class="text-muted">Recommended: 2 to 7 days</small>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold h6 text-dark mb-2">
+                            <i class="fa-solid fa-users text-success me-2"></i>3. Number of Travelers
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <input 
+                                type="number" 
+                                name="numTravelers" 
+                                id="travelersInput" 
+                                value="2" 
+                                min="1" 
+                                max="20" 
+                                class="form-control rounded-3" 
+                                required
+                            >
+                            <span class="input-group-text bg-light text-muted">People</span>
+                        </div>
+                        <small class="text-muted">Solo, couple, friends, or family</small>
+                    </div>
+                </div>
+
+                <!-- 3. Budget Mode Selector -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold h6 text-dark mb-2">
+                        <i class="fa-solid fa-wallet text-warning me-2"></i>4. Choose Your Budget Tier
+                    </label>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="radio" name="budgetTier" value="LOW" id="budgetLow" class="d-none budget-radio">
+                            <label for="budgetLow" class="card budget-card h-100 p-3 rounded-4 border text-center cursor-pointer" role="button">
+                                <span class="badge bg-secondary mb-2">Backpacker / Low</span>
+                                <h6 class="fw-bold mb-1">&#8377;1,500 / day</h6>
+                                <small class="text-muted">Hostels, local transit & delicious street eats</small>
+                            </label>
+                        </div>
+
+                        <div class="col-md-4">
+                            <input type="radio" name="budgetTier" value="MEDIUM" id="budgetMed" class="d-none budget-radio" checked>
+                            <label for="budgetMed" class="card budget-card h-100 p-3 rounded-4 border text-center cursor-pointer" role="button">
+                                <span class="badge bg-primary mb-2">Standard / Medium</span>
+                                <h6 class="fw-bold text-primary mb-1">&#8377;3,500 / day</h6>
+                                <small class="text-muted">Quality hotels, popular cafes & top activities</small>
+                            </label>
+                        </div>
+
+                        <div class="col-md-4">
+                            <input type="radio" name="budgetTier" value="HIGH" id="budgetHigh" class="d-none budget-radio">
+                            <label for="budgetHigh" class="card budget-card h-100 p-3 rounded-4 border text-center cursor-pointer" role="button">
+                                <span class="badge bg-dark mb-2">Luxury / High</span>
+                                <h6 class="fw-bold mb-1">&#8377;8,000+ / day</h6>
+                                <small class="text-muted">Resorts, private cabs & fine dining</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Travel Interests -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold h6 text-dark mb-2">
+                        <i class="fa-solid fa-heart text-danger me-2"></i>5. Select Your Travel Interests (Select multiple)
+                    </label>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <% const allInterests = [
+                            { name: "Adventure", icon: "fa-person-hiking" },
+                            { name: "Nature", icon: "fa-tree" },
+                            { name: "Food", icon: "fa-utensils" },
+                            { name: "Historical", icon: "fa-monument" },
+                            { name: "Relaxation", icon: "fa-spa" },
+                            { name: "Culture", icon: "fa-masks-theater" },
+                            { name: "Shopping", icon: "fa-bag-shopping" }
+                        ]; %>
+
+                        <% for(let interest of allInterests) { %>
+                            <div>
+                                <input 
+                                    type="checkbox" 
+                                    name="interests" 
+                                    value="<%= interest.name %>" 
+                                    id="interest_<%= interest.name %>" 
+                                    class="d-none interest-checkbox"
+                                    <%= (interest.name === 'Adventure' || interest.name === 'Nature' || interest.name === 'Food') ? 'checked' : '' %>
+                                >
+                                <label for="interest_<%= interest.name %>" class="btn btn-outline-secondary rounded-pill px-3 py-2 interest-label" role="button">
+                                    <i class="fa-solid <%= interest.icon %> me-1"></i> <%= interest.name %>
+                                </label>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-4 pt-3 border-top text-center">
+                    <button type="submit" class="btn btn-danger btn-lg rounded-pill px-5 py-3 fw-bold shadow" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Generate Smart Itinerary
+                    </button>
+                    <p class="text-muted small mt-2 mb-0">Powered by deterministic routing algorithm and instant budget calculations</p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

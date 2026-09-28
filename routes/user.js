@@ -17,4 +17,12 @@ router.route("/login")
 
 router.get("/logout", userController.logout);
 
+const Destination = require("../models/destination.js");
+
+// Home page
+router.get("/", wrapAsync(async (req, res) => {
+    const featuredDestinations = await Destination.find({}).sort({ featured: -1, name: 1 }).limit(6);
+    res.render("home.ejs", { featuredDestinations });
+}));
+
 module.exports=router;

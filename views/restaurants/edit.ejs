@@ -1,0 +1,86 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4 mb-5">
+    <div class="col-lg-8 offset-lg-2 col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h2 class="fw-bold mb-1">Edit Restaurant</h2>
+            <p class="text-muted mb-4">Update details for <%= restaurant.name %>.</p>
+
+            <form method="POST" action="/restaurants/<%= restaurant._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label fw-semibold">Restaurant Name</label>
+                        <input name="restaurant[name]" id="name" value="<%= restaurant.name %>" type="text" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="destination" class="form-label fw-semibold">Destination</label>
+                        <select name="restaurant[destination]" id="destination" class="form-select rounded-3" required>
+                            <% if(typeof allDestinations !== 'undefined') { %>
+                                <% for(let dest of allDestinations) { %>
+                                    <option value="<%= dest._id %>" <%= (restaurant.destination && restaurant.destination.toString() === dest._id.toString()) ? 'selected' : '' %>><%= dest.name %></option>
+                                <% } %>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="location" class="form-label fw-semibold">Address / Location</label>
+                        <input name="restaurant[location]" id="location" value="<%= restaurant.location %>" type="text" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea name="restaurant[description]" id="description" rows="3" class="form-control rounded-3" required><%= restaurant.description %></textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="cuisine" class="form-label fw-semibold">Cuisines (Comma separated)</label>
+                        <input name="restaurant[cuisine]" id="cuisine" value="<%= restaurant.cuisine ? restaurant.cuisine.join(', ') : '' %>" type="text" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="specialties" class="form-label fw-semibold">Specialties (Comma separated)</label>
+                        <input name="restaurant[specialties]" id="specialties" value="<%= restaurant.specialties ? restaurant.specialties.join(', ') : '' %>" type="text" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="price" class="form-label fw-semibold">Average Price / Person (INR)</label>
+                        <input name="restaurant[averagePrice]" id="price" value="<%= restaurant.averagePrice %>" type="number" min="1" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="budget" class="form-label fw-semibold">Budget Category</label>
+                        <% const budgetOptions = ["LOW", "MEDIUM", "HIGH"]; %>
+                        <select name="restaurant[budgetCategory]" id="budget" class="form-select rounded-3">
+                            <% for(let bo of budgetOptions) { %>
+                                <option value="<%= bo %>" <%= (restaurant.budgetCategory === bo) ? 'selected' : '' %>><%= bo %></option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="hours" class="form-label fw-semibold">Opening Hours</label>
+                        <input name="restaurant[openingHours]" id="hours" value="<%= restaurant.openingHours %>" type="text" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Current Image</label>
+                        <div class="mb-2">
+                            <img src="<%= restaurant.image.url %>" class="rounded-3 shadow-sm" style="height: 120px; object-fit: cover;" alt="Current photo">
+                        </div>
+                        <label for="image" class="form-label fw-semibold">Replace Photo (Optional)</label>
+                        <input name="restaurant[image]" id="image" type="file" class="form-control rounded-3">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button class="btn btn-danger rounded-pill px-4 py-2" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-check me-1"></i> Update Restaurant
+                    </button>
+                    <a href="/restaurants/<%= restaurant._id %>" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

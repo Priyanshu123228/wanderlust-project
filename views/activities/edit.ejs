@@ -1,0 +1,96 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4 mb-5">
+    <div class="col-lg-8 offset-lg-2 col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h2 class="fw-bold mb-1">Edit Activity</h2>
+            <p class="text-muted mb-4">Update experience details for <%= activity.name %>.</p>
+
+            <form method="POST" action="/activities/<%= activity._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label fw-semibold">Activity Name</label>
+                        <input name="activity[name]" id="name" value="<%= activity.name %>" type="text" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="destination" class="form-label fw-semibold">Destination</label>
+                        <select name="activity[destination]" id="destination" class="form-select rounded-3" required>
+                            <% if(typeof allDestinations !== 'undefined') { %>
+                                <% for(let dest of allDestinations) { %>
+                                    <option value="<%= dest._id %>" <%= (activity.destination && activity.destination.toString() === dest._id.toString()) ? 'selected' : '' %>><%= dest.name %></option>
+                                <% } %>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="location" class="form-label fw-semibold">Location / Meeting Point</label>
+                        <input name="activity[location]" id="location" value="<%= activity.location %>" type="text" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea name="activity[description]" id="description" rows="3" class="form-control rounded-3" required><%= activity.description %></textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="category" class="form-label fw-semibold">Category</label>
+                        <% const categories = ["Adventure", "Nature", "Food", "Shopping", "Historical", "Relaxation", "Culture"]; %>
+                        <select name="activity[category]" id="category" class="form-select rounded-3">
+                            <% for(let c of categories) { %>
+                                <option value="<%= c %>" <%= (activity.category === c) ? 'selected' : '' %>><%= c %></option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="cost" class="form-label fw-semibold">Estimated Cost (INR / person)</label>
+                        <input name="activity[estimatedCost]" id="cost" value="<%= activity.estimatedCost %>" type="number" min="0" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="duration" class="form-label fw-semibold">Duration (Minutes)</label>
+                        <input name="activity[duration]" id="duration" value="<%= activity.duration %>" type="number" min="15" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="budget" class="form-label fw-semibold">Budget Category</label>
+                        <% const budgetOptions = ["LOW", "MEDIUM", "HIGH"]; %>
+                        <select name="activity[budgetCategory]" id="budget" class="form-select rounded-3">
+                            <% for(let bo of budgetOptions) { %>
+                                <option value="<%= bo %>" <%= (activity.budgetCategory === bo) ? 'selected' : '' %>><%= bo %></option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="time" class="form-label fw-semibold">Suitable Time of Day</label>
+                        <% const times = ["Morning", "Afternoon", "Evening", "Night", "Anytime"]; %>
+                        <select name="activity[suitableTimeOfDay]" id="time" class="form-select rounded-3">
+                            <% for(let t of times) { %>
+                                <option value="<%= t %>" <%= (activity.suitableTimeOfDay === t) ? 'selected' : '' %>><%= t %></option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Current Photo</label>
+                        <div class="mb-2">
+                            <img src="<%= activity.image.url %>" class="rounded-3 shadow-sm" style="height: 120px; object-fit: cover;" alt="Current photo">
+                        </div>
+                        <label for="image" class="form-label fw-semibold">Replace Photo (Optional)</label>
+                        <input name="activity[image]" id="image" type="file" class="form-control rounded-3">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button class="btn btn-danger rounded-pill px-4 py-2" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-check me-1"></i> Update Activity
+                    </button>
+                    <a href="/activities/<%= activity._id %>" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

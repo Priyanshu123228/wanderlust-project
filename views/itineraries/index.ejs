@@ -1,0 +1,76 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Header Banner -->
+<div class="py-4 mb-4 text-center rounded-4 shadow-sm" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #fe424d 100%); color: white; padding: 2.5rem 1.5rem;">
+    <h1 class="fw-bold mb-2"><i class="fa-regular fa-bookmark me-2"></i>My Saved Trips & Itineraries</h1>
+    <p class="lead mb-4" style="max-width: 600px; margin: 0 auto; opacity: 0.95;">
+        View, manage, customize, and budget all your planned vacations in one central dashboard.
+    </p>
+    <a href="/itinerary/new" class="btn btn-light rounded-pill px-4 py-2 fw-bold shadow">
+        <i class="fa-solid fa-plus me-1 text-danger"></i> Plan a New Trip
+    </a>
+</div>
+
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4 mb-5">
+    <% if(userTrips.length === 0) { %>
+        <div class="col-12 text-center py-5">
+            <i class="fa-solid fa-map-location-dot fa-3x text-muted mb-3"></i>
+            <h4 class="text-secondary">You haven't saved any trips yet</h4>
+            <p class="text-muted">Use our Smart Itinerary Planner to generate customized travel plans in seconds.</p>
+            <a href="/itinerary/new" class="btn btn-danger rounded-pill px-4 py-2 fw-bold" style="background-color: #fe424d; border-color: #fe424d;">
+                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Start Planning
+            </a>
+        </div>
+    <% } %>
+
+    <% for(let trip of userTrips) { %>
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative">
+                <div class="p-4 bg-dark text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge bg-danger rounded-pill px-2 py-1 small mb-1"><%= trip.budgetTier %> Budget</span>
+                        <h5 class="fw-bold mb-0 text-white text-truncate" style="max-width: 220px;"><%= trip.title %></h5>
+                        <small class="text-light opacity-75"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= trip.destinationName %></small>
+                    </div>
+                    <span class="badge bg-white text-dark px-2 py-1 rounded-pill small"><%= trip.durationDays %> Days</span>
+                </div>
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center pb-2 border-bottom mb-3">
+                        <small class="text-muted"><i class="fa-solid fa-users text-primary me-1"></i><%= trip.numTravelers %> Travelers</small>
+                        <small class="text-muted"><i class="fa-regular fa-clock text-secondary me-1"></i><%= new Date(trip.createdAt).toLocaleDateString() %></small>
+                    </div>
+
+                    <!-- Interests -->
+                    <% if(trip.interests && trip.interests.length) { %>
+                        <div class="mb-3">
+                            <% for(let interest of trip.interests.slice(0, 3)) { %>
+                                <span class="badge bg-light text-secondary border me-1"><%= interest %></span>
+                            <% } %>
+                        </div>
+                    <% } %>
+
+                    <!-- Notes -->
+                    <% if(trip.customNotes) { %>
+                        <p class="card-text text-muted small mb-3 fst-italic text-truncate">
+                            "<%= trip.customNotes %>"
+                        </p>
+                    <% } %>
+
+                    <!-- Total Cost -->
+                    <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+                        <div>
+                            <small class="text-muted d-block">Estimated Total</small>
+                            <h5 class="fw-bold text-dark mb-0">&#8377;<%= trip.costBreakdown ? trip.costBreakdown.grandTotal.toLocaleString("en-IN") : '0' %></h5>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="/itinerary/<%= trip._id %>" class="btn btn-sm btn-danger rounded-pill px-3" style="background-color: #fe424d; border-color: #fe424d;">
+                                View Plan
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>

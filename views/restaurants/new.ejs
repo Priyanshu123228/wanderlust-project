@@ -1,0 +1,89 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4 mb-5">
+    <div class="col-lg-8 offset-lg-2 col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h2 class="fw-bold mb-1">Add Food Spot / Restaurant</h2>
+            <p class="text-muted mb-4">Add a cafe, eatery, or fine dining place to Wanderlust travel guides.</p>
+
+            <form method="POST" action="/restaurants" novalidate class="needs-validation" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label fw-semibold">Restaurant Name</label>
+                        <input name="restaurant[name]" id="name" placeholder="e.g. Cafe 1947" type="text" class="form-control rounded-3" required>
+                        <div class="invalid-feedback">Please enter restaurant name.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="destination" class="form-label fw-semibold">Destination</label>
+                        <select name="restaurant[destination]" id="destination" class="form-select rounded-3" required>
+                            <option value="">-- Select Destination --</option>
+                            <% if(typeof allDestinations !== 'undefined') { %>
+                                <% for(let dest of allDestinations) { %>
+                                    <option value="<%= dest._id %>"><%= dest.name %> (<%= dest.location %>)</option>
+                                <% } %>
+                            <% } %>
+                        </select>
+                        <div class="invalid-feedback">Please select destination.</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="location" class="form-label fw-semibold">Full Address / Location</label>
+                        <input name="restaurant[location]" id="location" placeholder="e.g. Old Manali Road, Near Club House, Manali" type="text" class="form-control rounded-3" required>
+                        <div class="invalid-feedback">Address is required for geocoding.</div>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea name="restaurant[description]" id="description" rows="3" class="form-control rounded-3" placeholder="Describe the ambiance, seating, river view, music, specialties..." required></textarea>
+                        <div class="invalid-feedback">Please provide a description.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="cuisine" class="form-label fw-semibold">Cuisines (Comma separated)</label>
+                        <input name="restaurant[cuisine]" id="cuisine" placeholder="e.g. Italian, Continental, Tibetan, Cafe" type="text" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="specialties" class="form-label fw-semibold">Specialties / Must-Try Dishes</label>
+                        <input name="restaurant[specialties]" id="specialties" placeholder="e.g. Woodfired Pizza, Trout Fish, Apple Pie" type="text" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="price" class="form-label fw-semibold">Average Price / Person (INR)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">&#8377;</span>
+                            <input name="restaurant[averagePrice]" id="price" placeholder="450" type="number" min="1" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="budget" class="form-label fw-semibold">Budget Category</label>
+                        <select name="restaurant[budgetCategory]" id="budget" class="form-select rounded-3">
+                            <option value="LOW">Low (&#8804; &#8377;300)</option>
+                            <option value="MEDIUM" selected>Medium (&#8377;300 - &#8377;700)</option>
+                            <option value="HIGH">High (&#8377;700+)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="hours" class="form-label fw-semibold">Opening Hours</label>
+                        <input name="restaurant[openingHours]" id="hours" placeholder="e.g. 11:00 AM - 11:00 PM" value="10:00 AM - 10:30 PM" type="text" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="image" class="form-label fw-semibold">Restaurant Photo</label>
+                        <input name="restaurant[image]" id="image" type="file" class="form-control rounded-3">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button class="btn btn-danger rounded-pill px-4 py-2" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-plus me-1"></i> Save Restaurant
+                    </button>
+                    <a href="/restaurants" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

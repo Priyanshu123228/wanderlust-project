@@ -1,0 +1,82 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4 mb-5">
+    <div class="col-lg-8 offset-lg-2 col-12">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+            <div class="position-relative">
+                <img src="<%= attraction.image.url %>" class="w-100" style="height: 380px; object-fit: cover;" alt="<%= attraction.name %>">
+                <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%); color: white;">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <span class="badge bg-danger px-3 py-2 rounded-pill"><i class="fa-solid fa-location-dot me-1"></i><%= attraction.destinationName %></span>
+                        <span class="badge bg-success px-3 py-2 rounded-pill fw-bold"><%= attraction.category %></span>
+                    </div>
+                    <h1 class="display-6 fw-bold mb-0"><%= attraction.name %></h1>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+                    <div>
+                        <p class="text-muted mb-0"><i class="fa-solid fa-map-pin text-danger me-1"></i><%= attraction.location %></p>
+                        <small class="text-muted"><i class="fa-regular fa-clock text-primary me-1"></i><%= attraction.openingHours %> &bull; Best in <%= attraction.bestTimeOfDay || 'Morning' %></small>
+                    </div>
+                    <div class="text-end">
+                        <% if(attraction.entryFee === 0) { %>
+                            <h4 class="fw-bold text-success mb-0">Free Entry</h4>
+                        <% } else { %>
+                            <h4 class="fw-bold text-dark mb-0">&#8377;<%= attraction.entryFee.toLocaleString("en-IN") %> <small class="text-muted fw-normal fs-6">/ person</small></h4>
+                        <% } %>
+                        <small class="text-muted">Avg. time: <%= attraction.estimatedVisitDuration %> mins</small>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mb-2">Overview & Heritage</h5>
+                <p class="text-secondary leading-relaxed" style="font-size: 1.05rem; line-height: 1.8;"><%= attraction.description %></p>
+
+                <!-- Location Map -->
+                <div class="my-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Location</h5>
+                    <div id="attr-map" class="rounded-4 border shadow-sm" style="height: 300px; width: 100%;"></div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a href="/itinerary/new?destination=<%= attraction.destinationName %>" class="btn btn-danger rounded-pill px-4" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Add to Trip Plan
+                    </a>
+
+                    <% if(currUser) { %>
+                        <div class="d-flex gap-2">
+                            <a href="/attractions/<%= attraction._id %>/edit" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Edit</a>
+                            <form action="/attractions/<%= attraction._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this attraction?');">
+                                <button class="btn btn-sm btn-outline-danger rounded-pill px-3">Delete</button>
+                            </form>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const coordinates = <%- JSON.stringify(attraction.geometry?.coordinates || [77.1892, 32.2432]) %>;
+    const mapToken = "<%= mapToken || '' %>";
+
+    if (mapToken && document.getElementById("attr-map")) {
+        mapboxgl.accessToken = mapToken;
+        const map = new mapboxgl.Map({
+            container: "attr-map",
+            style: "mapbox://styles/mapbox/streets-v12",
+            center: coordinates,
+            zoom: 12
+        });
+
+        new mapboxgl.Marker({ color: "#16a085" })
+            .setLngLat(coordinates)
+            .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<h6><%= attraction.name %></h6><p><%= attraction.location %></p>`))
+            .addTo(map);
+
+        map.addControl(new mapboxgl.NavigationControl());
+    }
+</script>

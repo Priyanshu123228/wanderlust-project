@@ -52,7 +52,7 @@
   <div class="container-fluid">
 
     <!-- Logo -->
-    <a class="navbar-brand" href="/listings">
+    <a class="navbar-brand" href="/">
       <i class="fa-regular fa-compass"></i>
     </a>
 
@@ -69,28 +69,37 @@
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 
       <!-- Left -->
-      <div class="navbar-nav">
-        <a class="nav-link" href="/listings">Explore</a>
+      <div class="navbar-nav align-items-center gap-1">
+        <a class="nav-link fw-semibold" href="/destinations">Destinations</a>
+        <a class="nav-link fw-semibold" href="/listings">Stays</a>
+        <a class="nav-link fw-semibold" href="/restaurants">Food</a>
+        <a class="nav-link fw-semibold" href="/activities">Activities</a>
+        <a class="nav-link fw-semibold" href="/attractions">Attractions</a>
+        <a class="btn btn-sm btn-danger rounded-pill px-3 py-1 ms-1 text-white fw-bold shadow-sm" href="/itinerary/new" style="background-color: #fe424d; border: none;">
+          <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Plan Trip
+        </a>
       </div>
 
       <!-- Center Search -->
-      <form class="d-flex mx-auto search-form" role="search">
-
+      <form class="d-flex mx-auto search-form" action="/destinations" method="GET" role="search">
         <input
           class="form-control search-inp"
           type="search"
-          placeholder="Search destinations"
+          name="q"
+          placeholder="Search destinations (e.g. Manali, Goa...)"
         />
-
         <button class="btn search-btn" type="submit">
           <i class="fa-solid fa-magnifying-glass"></i>
           Search
         </button>
-
       </form>
 
       <!-- Right -->
-      <div class="navbar-nav ms-auto">
+      <div class="navbar-nav ms-auto align-items-center">
+        <% if(currUser){ %>
+          <a class="nav-link fw-semibold" href="/itinerary/my-trips"><i class="fa-regular fa-bookmark me-1 text-danger"></i>My Trips</a>
+        <% } %>
+
         <a class="nav-link" href="/listings/new">Airbnb your home</a>
 
         <% if(!currUser){ %>

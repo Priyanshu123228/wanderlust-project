@@ -1,0 +1,91 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="row mt-4 mb-5">
+    <div class="col-lg-8 offset-lg-2 col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <h2 class="fw-bold mb-1">Edit Attraction</h2>
+            <p class="text-muted mb-4">Update details for <%= attraction.name %>.</p>
+
+            <form method="POST" action="/attractions/<%= attraction._id %>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="name" class="form-label fw-semibold">Attraction Name</label>
+                        <input name="attraction[name]" id="name" value="<%= attraction.name %>" type="text" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="destination" class="form-label fw-semibold">Destination</label>
+                        <select name="attraction[destination]" id="destination" class="form-select rounded-3" required>
+                            <% if(typeof allDestinations !== 'undefined') { %>
+                                <% for(let dest of allDestinations) { %>
+                                    <option value="<%= dest._id %>" <%= (attraction.destination && attraction.destination.toString() === dest._id.toString()) ? 'selected' : '' %>><%= dest.name %></option>
+                                <% } %>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="location" class="form-label fw-semibold">Address / Area</label>
+                        <input name="attraction[location]" id="location" value="<%= attraction.location %>" type="text" class="form-control rounded-3" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea name="attraction[description]" id="description" rows="3" class="form-control rounded-3" required><%= attraction.description %></textarea>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="category" class="form-label fw-semibold">Category</label>
+                        <% const categories = ["Spiritual", "Historical", "Nature", "Scenic", "Cultural", "Viewpoint", "Architecture"]; %>
+                        <select name="attraction[category]" id="category" class="form-select rounded-3">
+                            <% for(let c of categories) { %>
+                                <option value="<%= c %>" <%= (attraction.category === c) ? 'selected' : '' %>><%= c %></option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="entryFee" class="form-label fw-semibold">Entry Fee (INR)</label>
+                        <input name="attraction[entryFee]" id="entryFee" value="<%= attraction.entryFee %>" type="number" min="0" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="duration" class="form-label fw-semibold">Visit Duration (Minutes)</label>
+                        <input name="attraction[estimatedVisitDuration]" id="duration" value="<%= attraction.estimatedVisitDuration %>" type="number" min="15" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="hours" class="form-label fw-semibold">Opening Hours</label>
+                        <input name="attraction[openingHours]" id="hours" value="<%= attraction.openingHours %>" type="text" class="form-control rounded-3">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="bestTime" class="form-label fw-semibold">Best Time of Day</label>
+                        <% const times = ["Morning", "Afternoon", "Evening", "Anytime"]; %>
+                        <select name="attraction[bestTimeOfDay]" id="bestTime" class="form-select rounded-3">
+                            <% for(let t of times) { %>
+                                <option value="<%= t %>" <%= (attraction.bestTimeOfDay === t) ? 'selected' : '' %>><%= t %></option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Current Photo</label>
+                        <div class="mb-2">
+                            <img src="<%= attraction.image.url %>" class="rounded-3 shadow-sm" style="height: 120px; object-fit: cover;" alt="Current photo">
+                        </div>
+                        <label for="image" class="form-label fw-semibold">Replace Photo (Optional)</label>
+                        <input name="attraction[image]" id="image" type="file" class="form-control rounded-3">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button class="btn btn-danger rounded-pill px-4 py-2" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-check me-1"></i> Update Attraction
+                    </button>
+                    <a href="/attractions/<%= attraction._id %>" class="btn btn-outline-secondary rounded-pill px-4 py-2">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

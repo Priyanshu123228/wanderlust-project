@@ -1,0 +1,126 @@
+<% layout("/layouts/boilerplate") %>
+
+<!-- Header Banner -->
+<div class="py-4 mb-4 text-center rounded-4 shadow-sm" style="background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 50%, #e056fd 100%); color: white; padding: 2.5rem 1.5rem;">
+    <h1 class="fw-bold mb-2"><i class="fa-solid fa-person-hiking me-2"></i>Experiences & Adventures</h1>
+    <p class="lead mb-4" style="max-width: 600px; margin: 0 auto; opacity: 0.95;">
+        Paragliding, river rafting, desert safaris, local cooking classes, sunset boat cruises, and thrilling outdoor sports.
+    </p>
+
+    <!-- Search Form -->
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <form action="/activities" method="GET" class="d-flex bg-white rounded-pill p-1 shadow">
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="<%= typeof q !== 'undefined' ? q : '' %>"
+                    class="form-control border-0 rounded-pill px-3 shadow-none" 
+                    placeholder="Search activity, outdoor sport, adventure..."
+                >
+                <button class="btn btn-primary rounded-pill px-4 text-white fw-bold" style="background-color: #8e44ad; border-color: #8e44ad;" type="submit">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="bg-light p-3 rounded-4 border shadow-sm mb-4">
+    <form action="/activities" method="GET" class="row g-2 align-items-center">
+        <div class="col-md-4 col-12">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-location-dot text-danger me-1"></i>Destination</label>
+            <select name="destination" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <option value="All" <%= (typeof selectedDestination !== 'undefined' && selectedDestination === 'All') ? 'selected' : '' %>>All Destinations</option>
+                <% if(typeof allDestinations !== 'undefined' && allDestinations.length) { %>
+                    <% for(let dest of allDestinations) { %>
+                        <option value="<%= dest.name %>" <%= (typeof selectedDestination !== 'undefined' && selectedDestination === dest.name) ? 'selected' : '' %>><%= dest.name %></option>
+                    <% } %>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="col-md-4 col-6">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-tags text-primary me-1"></i>Interest / Category</label>
+            <% const categories = ["All", "Adventure", "Nature", "Food", "Shopping", "Historical", "Relaxation", "Culture"]; %>
+            <select name="category" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <% for(let cat of categories) { %>
+                    <option value="<%= cat %>" <%= (typeof selectedCategory !== 'undefined' && selectedCategory === cat) ? 'selected' : '' %>><%= cat %></option>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="col-md-4 col-6">
+            <label class="form-label small fw-bold text-muted mb-1"><i class="fa-solid fa-wallet text-success me-1"></i>Budget Tier</label>
+            <select name="budget" class="form-select form-select-sm rounded-pill" onchange="this.form.submit()">
+                <option value="All" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'All') ? 'selected' : '' %>>All Budgets</option>
+                <option value="LOW" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'LOW') ? 'selected' : '' %>>Low (&#8804; &#8377;500)</option>
+                <option value="MEDIUM" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'MEDIUM') ? 'selected' : '' %>>Medium (&#8377;500 - &#8377;2,500)</option>
+                <option value="HIGH" <%= (typeof selectedBudget !== 'undefined' && selectedBudget === 'HIGH') ? 'selected' : '' %>>High (&#8377;2,500+)</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<!-- Add Button -->
+<% if(currUser) { %>
+    <div class="d-flex justify-content-end mb-3">
+        <a href="/activities/new" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2">
+            <i class="fa-solid fa-plus me-1"></i> Add Activity
+        </a>
+    </div>
+<% } %>
+
+<!-- Activities Grid -->
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-1 g-4 mb-5">
+    <% if(allActivities.length === 0) { %>
+        <div class="col-12 text-center py-5">
+            <i class="fa-solid fa-person-running fa-3x text-muted mb-3"></i>
+            <h4 class="text-secondary">No activities found</h4>
+            <p class="text-muted">Try a different filter or search term.</p>
+            <a href="/activities" class="btn btn-outline-danger rounded-pill mt-2">View All Activities</a>
+        </div>
+    <% } %>
+
+    <% for(let act of allActivities) { %>
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative">
+                <img src="<%= act.image.url %>" class="card-img-top" alt="<%= act.name %>" style="height: 200px; object-fit: cover;">
+                
+                <span class="badge bg-dark bg-opacity-75 position-absolute top-0 start-0 m-3 px-2 py-1 rounded-pill small">
+                    <i class="fa-solid fa-location-dot me-1 text-danger"></i><%= act.destinationName %>
+                </span>
+
+                <span class="badge bg-primary position-absolute top-0 end-0 m-3 px-2 py-1 rounded-pill fw-bold small" style="background-color: #8e44ad !important;">
+                    <%= act.category %>
+                </span>
+
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-baseline mb-1">
+                        <h5 class="card-title fw-bold text-dark mb-0"><%= act.name %></h5>
+                        <small class="text-muted"><i class="fa-solid fa-star text-warning me-1"></i><%= act.rating || 4.7 %></small>
+                    </div>
+                    
+                    <p class="text-muted small mb-2"><i class="fa-regular fa-clock me-1 text-secondary"></i>Duration: ~<%= act.duration %> mins &bull; <%= act.suitableTimeOfDay || 'Daytime' %></p>
+                    
+                    <p class="card-text text-secondary small mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                        <%= act.description %>
+                    </p>
+
+                    <!-- Price / Footer -->
+                    <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
+                        <div>
+                            <span class="fw-bold text-dark">&#8377;<%= act.estimatedCost.toLocaleString("en-IN") %></span>
+                            <small class="text-muted">/ person</small>
+                            <span class="badge bg-secondary-subtle text-secondary border ms-1 small"><%= act.budgetCategory %></span>
+                        </div>
+                        <a href="/activities/<%= act._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                            View Activity
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+</div>
