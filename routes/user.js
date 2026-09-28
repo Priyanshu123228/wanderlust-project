@@ -1,10 +1,10 @@
-const express=require("express");
-const router=express.Router();
-const User=require("../models/user.js");
+const express = require("express");
+const router = express.Router();
+const User = require("../models/user.js");
 const wrapAsync = require("../utils/wrapAsync.js");
 const passport = require("passport");
-const {saveRedirectUrl}=require("../middleware.js");
-const userController=require("../controllers/users.js");
+const { saveRedirectUrl } = require("../middleware.js");
+const userController = require("../controllers/users.js");
 
 
 router.route("/signup")
@@ -12,24 +12,23 @@ router.route("/signup")
     .post(wrapAsync(userController.signup));
 
 router.route("/login")
-  .get(userController.renderLoginForm)
-    .post(saveRedirectUrl,passport.authenticate("local",{failureFlash:true,failureRedirect:"/login"}),userController.login);
+    .get(userController.renderLoginForm)
+    .post(saveRedirectUrl, passport.authenticate("local", { failureFlash: true, failureRedirect: "/login" }), userController.login);
 
 router.get("/logout", userController.logout);
 
-<<<<<<< HEAD
+
 const Destination = require("../models/destination.js");
 
 // Home page
 router.get("/", wrapAsync(async (req, res) => {
     const featuredDestinations = await Destination.find({}).sort({ featured: -1, name: 1 }).limit(6);
     res.render("home.ejs", { featuredDestinations });
-}));
-=======
+}))
 // Home page
 router.get("/", (req, res) => {
     res.redirect("/listings");
 });
->>>>>>> 282d25a14d207173c0e7cc02ec3491f3e42b2724
 
-module.exports=router;
+
+module.exports = router;
