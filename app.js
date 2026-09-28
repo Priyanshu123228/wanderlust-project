@@ -25,8 +25,6 @@ const activityRouter=require("./routes/activity.js");
 const itineraryRouter=require("./routes/itinerary.js");
 
 
-
-
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
@@ -111,8 +109,11 @@ app.use("/listings/:id/reviews",reviewRouter);
 //user routes
 app.use("/" , userRouter);
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 282d25a14d207173c0e7cc02ec3491f3e42b2724
 app.use((req, res, next) => {
     next(new ExpressError(404, "Page not found"));
 });
