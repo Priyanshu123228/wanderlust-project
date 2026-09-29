@@ -46,10 +46,44 @@ module.exports.saveItinerary = async (req, res) => {
     }
 
     const { planData, customNotes } = req.body;
-    let parsedPlan;
-    try {
-        parsedPlan = typeof planData === "string" ? JSON.parse(planData) : planData;
-    } catch (err) {
+    let parsedPlan = null;
+
+    if (!planData) {
+        req.flash("error", "No itinerary data provided to save.");
+        return res.redirect("/itinerary/new");
+    }
+
+    if (typeof planData === "object" && planData !== null) {
+        parsedPlan = planData;
+    } else if (typeof planData === "string") {
+        const raw = planData.trim();
+        
+        // 1. Try Base64 Decoding (Preferred for safe HTML form transmission)
+        try {
+            const decoded = Buffer.from(raw, "base64").toString("utf-8");
+            if (decoded.startsWith("{") && decoded.endsWith("}")) {
+                parsedPlan = JSON.parse(decoded);
+            }
+        } catch (e) {
+            // Not Base64, fallback to direct JSON parsing
+        }
+
+        // 2. Try Direct JSON.parse
+        if (!parsedPlan) {
+            try {
+                parsedPlan = JSON.parse(raw);
+            } catch (e) {
+                // 3. Try URI Decoded parse
+                try {
+                    parsedPlan = JSON.parse(decodeURIComponent(raw));
+                } catch (e2) {
+                    console.error("Failed to parse planData JSON:", e.message, "Raw snippet:", raw.substring(0, 100));
+                }
+            }
+        }
+    }
+
+    if (!parsedPlan || typeof parsedPlan !== "object") {
         req.flash("error", "Failed to parse itinerary data.");
         return res.redirect("/itinerary/new");
     }
