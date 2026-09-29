@@ -16,6 +16,9 @@ router.post("/", isLoggedIn, wrapAsync(itineraryController.saveItinerary));
 // Dashboard: My Trips
 router.get("/my-trips", isLoggedIn, wrapAsync(itineraryController.myTrips));
 
+// Download Complete Trip Itinerary as PDF
+router.get("/:id/download", isLoggedIn, wrapAsync(itineraryController.downloadItineraryPdf));
+
 // Single Trip View
 router.route("/:id")
     .get(wrapAsync(itineraryController.showItinerary))

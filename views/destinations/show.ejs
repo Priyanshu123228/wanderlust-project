@@ -88,6 +88,79 @@
                     </div>
                 </div>
 
+                <!-- Live Weather & Forecast Section -->
+                <div class="card border-0 bg-light rounded-4 p-4 my-4 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fa-solid fa-cloud-sun text-warning me-2"></i>Weather in <%= destination.name %>
+                        </h5>
+                        <% if(typeof weather !== 'undefined' && weather && weather.available) { %>
+                            <span class="badge bg-white text-dark border px-3 py-1 rounded-pill small">
+                                <i class="fa-solid fa-satellite-dish text-success me-1"></i>Live Forecast
+                            </span>
+                        <% } %>
+                    </div>
+
+                    <% if(typeof weather !== 'undefined' && weather && weather.available && weather.current) { %>
+                        <!-- Today Snapshot -->
+                        <div class="row align-items-center g-3 mb-3 pb-3 border-bottom">
+                            <div class="col-md-6 col-12">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="fs-1"><%= weather.current.emoji || '🌤️' %></span>
+                                    <div>
+                                        <h2 class="display-6 fw-bold mb-0 text-dark"><%= weather.current.temperature %>&deg;C</h2>
+                                        <span class="text-capitalize fw-semibold text-secondary"><%= weather.current.description || weather.current.condition %></span>
+                                        <small class="text-muted d-block">Feels like <%= weather.current.feelsLike %>&deg;C</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-12">
+                                <div class="d-flex gap-4 text-muted small">
+                                    <div>
+                                        <i class="fa-solid fa-droplet text-primary me-1"></i> Humidity: <strong><%= weather.current.humidity %>%</strong>
+                                    </div>
+                                    <div>
+                                        <i class="fa-solid fa-wind text-info me-1"></i> Wind: <strong><%= weather.current.windSpeed %> km/h</strong>
+                                    </div>
+                                </div>
+                                <% if(weather.current.suggestion) { %>
+                                    <div class="mt-2 p-2 bg-white rounded-3 small border border-light text-secondary">
+                                        <i class="fa-solid fa-circle-info text-primary me-1"></i> <%= weather.current.suggestion %>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <!-- 5-Day Forecast Cards -->
+                        <% if(weather.dailyForecast && weather.dailyForecast.length > 0) { %>
+                            <h6 class="fw-bold text-muted small text-uppercase mb-2">Upcoming Days Forecast</h6>
+                            <div class="row row-cols-lg-5 row-cols-md-3 row-cols-2 g-2">
+                                <% for(let df of weather.dailyForecast.slice(0, 5)) { %>
+                                    <div class="col">
+                                        <div class="bg-white p-2 rounded-3 border text-center h-100 shadow-none">
+                                            <small class="fw-semibold text-dark d-block text-truncate"><%= df.dayName %></small>
+                                            <span class="fs-3 my-1 d-block"><%= df.emoji %></span>
+                                            <span class="fw-bold text-dark"><%= df.temperature %>&deg;C</span>
+                                            <small class="text-muted d-block text-capitalize" style="font-size: 0.75rem;"><%= df.condition %></small>
+                                            <% if(df.rainProbability > 0) { %>
+                                                <small class="text-primary d-block" style="font-size: 0.7rem;"><i class="fa-solid fa-umbrella me-1"></i><%= df.rainProbability %>%</small>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% } %>
+                            </div>
+                        <% } %>
+                    <% } else { %>
+                        <div class="p-3 bg-white rounded-3 border text-muted small d-flex align-items-center gap-3">
+                            <i class="fa-solid fa-cloud-sun fa-2x text-secondary"></i>
+                            <div>
+                                <strong class="text-dark d-block">Live Weather Forecast</strong>
+                                <span>Weather information is currently unavailable.</span>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
                 <!-- Interactive Location Map -->
                 <div class="my-4">
                     <h5 class="fw-bold mb-3"><i class="fa-solid fa-map-pin text-danger me-2"></i>Location & Map</h5>

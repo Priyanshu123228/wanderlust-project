@@ -10,6 +10,22 @@ const itineraryDaySchema = new Schema({
         type: String,
         default: function() { return `Day ${this.dayNumber}`; }
     },
+    weather: {
+        available: { type: Boolean, default: false },
+        temperature: Number,
+        feelsLike: Number,
+        tempMin: Number,
+        tempMax: Number,
+        condition: String,
+        description: String,
+        icon: String,
+        iconUrl: String,
+        emoji: String,
+        humidity: Number,
+        windSpeed: Number,
+        rainProbability: Number,
+        suggestion: String
+    },
     morning: {
         type: { type: String, default: "Attraction" },
         attraction: { type: Schema.Types.ObjectId, ref: "Attraction" },

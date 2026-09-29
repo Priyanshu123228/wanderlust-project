@@ -15,7 +15,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 
-const listingRouter = require("./routes/listing.js");//express router
+const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
 const destinationRouter = require("./routes/destination.js");
@@ -83,30 +83,26 @@ app.use((req, res, next) => {
     next();
 });
 
-//destinations routes
+
 app.use("/destinations", destinationRouter);
 
-//restaurants routes
+
 app.use("/restaurants", restaurantRouter);
 
-//attractions routes
+
 app.use("/attractions", attractionRouter);
 
-//activities routes
+
 app.use("/activities", activityRouter);
 
-//itinerary routes
+
 app.use("/itinerary", itineraryRouter);
 
-
-//listing routes
 app.use("/listings", listingRouter);
 
 
-//reviews routes
 app.use("/listings/:id/reviews", reviewRouter);
 
-//user routes
 app.use("/", userRouter);
 
 app.use((req, res, next) => {

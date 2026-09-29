@@ -1,6 +1,9 @@
+const mongoose = require("mongoose");
 const Itinerary = require("../models/itinerary.js");
 const Destination = require("../models/destination.js");
 const { generateSmartItinerary } = require("../utils/itineraryAlgorithm.js");
+const { getDestinationWeather } = require("../utils/weatherService.js");
+const { generateItineraryPdf, sanitizeFilename } = require("../utils/tripPdfGenerator.js");
 const mapToken = process.env.MAP_TOKEN;
 
 // Render "Plan Your Trip" Generator Form
@@ -82,7 +85,18 @@ module.exports.showItinerary = async (req, res) => {
         return res.redirect("/itinerary/my-trips");
     }
 
-    res.render("itineraries/show.ejs", { itinerary, mapToken });
+    let weather = { available: false, message: "Weather information is currently unavailable." };
+    try {
+        const destName = itinerary.destinationName || (itinerary.destination ? itinerary.destination.name : null);
+        const coordinates = itinerary.destination?.geometry?.coordinates;
+        if (destName || coordinates) {
+            weather = await getDestinationWeather({ destinationName: destName, coordinates });
+        }
+    } catch (e) {
+        console.error("Error fetching weather in showItinerary:", e.message);
+    }
+
+    res.render("itineraries/show.ejs", { itinerary, weather, mapToken });
 };
 
 // Render Edit Saved Itinerary Form
@@ -136,4 +150,43 @@ module.exports.destroyItinerary = async (req, res) => {
     await Itinerary.findByIdAndDelete(id);
     req.flash("success", "Trip deleted successfully.");
     res.redirect("/itinerary/my-trips");
+};
+
+// Download Saved Itinerary as a Complete PDF Document
+module.exports.downloadItineraryPdf = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        req.flash("error", "Invalid trip ID!");
+        return res.redirect("/itinerary/my-trips");
+    }
+
+    const itinerary = await Itinerary.findById(id).populate("user").populate("destination");
+
+    if (!itinerary) {
+        req.flash("error", "Trip itinerary not found!");
+        return res.redirect("/itinerary/my-trips");
+    }
+
+    // Authorization: User must be the owner of this trip
+    if (itinerary.user && (!req.user || !itinerary.user._id.equals(req.user._id))) {
+        req.flash("error", "You do not have permission to download this trip!");
+        return res.redirect("/itinerary/my-trips");
+    }
+
+    try {
+        const pdfBuffer = await generateItineraryPdf(itinerary);
+
+        const sanitizedDest = sanitizeFilename(itinerary.destinationName || "Trip");
+        const filename = `Wanderlust-${sanitizedDest}-${itinerary.durationDays}-Day-Trip.pdf`;
+
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+        res.setHeader("Content-Length", pdfBuffer.length);
+        res.send(pdfBuffer);
+    } catch (err) {
+        console.error("PDF generation failed:", err);
+        req.flash("error", "Failed to generate trip PDF. Please try again or use the Print option.");
+        res.redirect(`/itinerary/${id}`);
+    }
 };

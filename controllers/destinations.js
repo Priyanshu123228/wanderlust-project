@@ -1,5 +1,6 @@
 const Destination = require("../models/destination.js");
 const Listing = require("../models/listing.js");
+const { getDestinationWeather } = require("../utils/weatherService.js");
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
 const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mapToken ? mbxGeocoding({ accessToken: mapToken }) : null;
@@ -47,7 +48,13 @@ module.exports.showDestination = async (req, res) => {
         ]
     }).limit(6);
 
-    res.render("destinations/show.ejs", { destination, stays, mapToken });
+    // Fetch Weather forecast from OpenWeatherMap
+    const weather = await getDestinationWeather({
+        destinationName: destination.name,
+        coordinates: destination.geometry ? destination.geometry.coordinates : null
+    });
+
+    res.render("destinations/show.ejs", { destination, stays, weather, mapToken });
 };
 
 // Create new destination

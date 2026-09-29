@@ -3,6 +3,7 @@ const Attraction = require("../models/attraction.js");
 const Activity = require("../models/activity.js");
 const Restaurant = require("../models/restaurant.js");
 const Listing = require("../models/listing.js");
+const { getDestinationWeather } = require("./weatherService.js");
 
 /**
  * Generate an optimized day-by-day travel plan with detailed time slots and budget calculation.
@@ -22,14 +23,21 @@ async function generateSmartItinerary({ destinationName, durationDays = 3, numTr
         destination = await Destination.findOne({ name: { $regex: new RegExp(destinationName, "i") } });
     }
 
-    // 2. Fetch candidates from MongoDB
+    // 2. Fetch candidates from MongoDB & Live Weather in parallel
     const destQuery = destination ? { $or: [{ destination: destination._id }, { destinationName: { $regex: new RegExp(destinationName, "i") } }] } : { destinationName: { $regex: new RegExp(destinationName, "i") } };
 
-    const [attractions, activities, restaurants, stays] = await Promise.all([
+    const [attractions, activities, restaurants, stays, weather] = await Promise.all([
         Attraction.find(destQuery),
         Activity.find(destQuery),
         Restaurant.find(destQuery),
-        Listing.find(destQuery)
+        Listing.find(destQuery),
+        getDestinationWeather({
+            destinationName: destination ? destination.name : destinationName,
+            coordinates: destination?.geometry?.coordinates
+        }).catch(err => {
+            console.error("Weather fetch failed:", err.message);
+            return { available: false, message: "Weather information is currently unavailable." };
+        })
     ]);
 
     // 3. Select matching stay
@@ -163,9 +171,18 @@ async function generateSmartItinerary({ destinationName, durationDays = 3, numTr
             pricePerNight: stayPricePerNight
         };
 
+        // Attach Day Weather Forecast
+        let dayWeather = { available: false, message: "Weather information is currently unavailable." };
+        if (weather && weather.available && weather.dailyForecast && weather.dailyForecast[day - 1]) {
+            dayWeather = { ...weather.dailyForecast[day - 1], available: true };
+        } else if (weather && weather.available && weather.current) {
+            dayWeather = { ...weather.current, dayNumber: day, available: true };
+        }
+
         dailyPlan.push({
             dayNumber: day,
             title: `Day ${day}: ${morning.title} & ${afternoon.title}`,
+            weather: dayWeather,
             morning,
             lunch,
             afternoon,
@@ -212,7 +229,8 @@ async function generateSmartItinerary({ destinationName, durationDays = 3, numTr
         selectedStay: selectedStay ? selectedStay._id : null,
         dailyPlan,
         costBreakdown,
-        destinationDetails: destination
+        destinationDetails: destination,
+        weather
     };
 }
 
