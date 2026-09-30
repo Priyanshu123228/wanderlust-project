@@ -1,116 +1,187 @@
 <style>
-  .navbar {
-    height: 5rem;
-    background-color: white;
+  .wanderlust-navbar {
+    background-color: #ffffff;
+    transition: all 0.2s ease;
+  }
+  .navbar-brand-logo {
+    color: #fe424d !important;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-decoration: none;
+  }
+  .navbar-brand-logo i {
+    font-size: 1.8rem;
+  }
+  .nav-link-custom {
+    color: #475569 !important;
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 9999px;
+    transition: all 0.15s ease;
+  }
+  .nav-link-custom:hover {
+    color: #0f172a !important;
+    background-color: #f1f5f9;
+  }
+  .nav-link-custom.active {
+    color: #fe424d !important;
+    background-color: #fff1f2;
   }
 
   /* Search Form */
-  .search-form {
+  .search-form-nav {
     display: flex;
     align-items: center;
-    border: 1px solid #ddd;
-    border-radius: 40px;
-    padding: 0.3rem 0.4rem 0.3rem 1rem;
-    background-color: white;
-    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    padding: 0.25rem 0.35rem 0.25rem 1rem;
+    background-color: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
   }
-
-  /* Input */
-  .search-inp {
+  .search-form-nav:focus-within {
+    border-color: #fe424d;
+    box-shadow: 0 0 0 3px rgba(254, 66, 77, 0.15);
+  }
+  .search-inp-nav {
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
-    width: 18rem;
-    font-size: 1rem;
+    width: 15rem;
+    font-size: 0.9rem;
+    background: transparent;
   }
-
-  .search-inp::placeholder {
-    color: #717171;
+  .search-inp-nav::placeholder {
+    color: #94a3b8;
+    font-size: 0.88rem;
   }
-
-  /* Button */
-  .search-btn {
+  .search-btn-nav {
     background-color: #fe424d;
     color: white;
     border: none;
-    border-radius: 50px;
-    padding: 0.5rem 1rem;
-    font-weight: 500;
+    border-radius: 9999px;
+    padding: 0.4rem 0.9rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: background-color 0.15s ease;
   }
-
-  .search-btn:hover {
-    background-color: #fe424d;
+  .search-btn-nav:hover {
+    background-color: #e0323d;
     color: white;
   }
-
-  .search-btn i {
-    margin-right: 0.4rem;
+  @media (max-width: 991.98px) {
+    .search-inp-nav {
+      width: 100%;
+    }
+    .search-form-nav {
+      margin: 0.75rem 0;
+      width: 100%;
+    }
   }
 </style>
 
-<nav class="navbar navbar-expand-md border-bottom sticky-top">
-  <div class="container-fluid">
+<nav class="navbar navbar-expand-lg border-bottom sticky-top wanderlust-navbar py-2">
+  <div class="container-fluid px-lg-4">
 
-    <!-- Logo -->
-    <a class="navbar-brand" href="/">
+    <!-- Brand Logo -->
+    <a class="navbar-brand-logo" href="/">
       <i class="fa-regular fa-compass"></i>
+      <span>Wanderlust</span>
     </a>
 
-    <!-- Toggle -->
+    <!-- Mobile Toggler -->
     <button
-      class="navbar-toggler"
+      class="navbar-toggler border-0 shadow-none p-1"
       type="button"
       data-bs-toggle="collapse"
-      data-bs-target="#navbarNavAltMarkup"
+      data-bs-target="#wanderlustNavContent"
+      aria-controls="wanderlustNavContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
     >
-      <span class="navbar-toggler-icon"></span>
+      <i class="fa-solid fa-bars fs-5 text-dark"></i>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="collapse navbar-collapse" id="wanderlustNavContent">
 
-      <!-- Left -->
-      <div class="navbar-nav align-items-center gap-1">
-        <a class="nav-link fw-semibold" href="/destinations">Destinations</a>
-        <a class="nav-link fw-semibold" href="/listings">Stays</a>
-        <a class="nav-link fw-semibold" href="/restaurants">Food</a>
-        <a class="nav-link fw-semibold" href="/activities">Activities</a>
-        <a class="nav-link fw-semibold" href="/attractions">Attractions</a>
-        <a class="btn btn-sm btn-danger rounded-pill px-3 py-1 ms-1 text-white fw-bold shadow-sm" href="/itinerary/new" style="background-color: #fe424d; border: none;">
-          <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Plan Trip
-        </a>
-      </div>
+      <!-- Center Navigation Links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center gap-1 ps-lg-3">
+        <li class="nav-item">
+          <a class="nav-link nav-link-custom" href="/destinations">Destinations</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-link-custom" href="/listings">Stays</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-link-custom" href="/restaurants">Food</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-link-custom" href="/activities">Activities</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link nav-link-custom" href="/attractions">Attractions</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-sm btn-danger rounded-pill px-3 py-1 ms-lg-1 text-white fw-bold shadow-sm" href="/itinerary/new" style="background-color: #fe424d; border: none;">
+            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Plan Trip
+          </a>
+        </li>
+      </ul>
 
       <!-- Center Search -->
-      <form class="d-flex mx-auto search-form" action="/destinations" method="GET" role="search">
+      <form class="d-flex search-form-nav my-2 my-lg-0 mx-lg-auto" action="/destinations" method="GET" role="search">
         <input
-          class="form-control search-inp"
+          class="form-control search-inp-nav"
           type="search"
           name="q"
           placeholder="Search destinations (e.g. Manali, Goa...)"
+          aria-label="Search destinations"
         />
-        <button class="btn search-btn" type="submit">
+        <button class="btn search-btn-nav" type="submit">
           <i class="fa-solid fa-magnifying-glass"></i>
-          Search
+          <span>Search</span>
         </button>
       </form>
 
-      <!-- Right -->
-      <div class="navbar-nav ms-auto align-items-center">
+      <!-- Right User Navigation -->
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
         <% if(currUser){ %>
-          <a class="nav-link fw-semibold" href="/itinerary/my-trips"><i class="fa-regular fa-bookmark me-1 text-danger"></i>My Trips</a>
+          <li class="nav-item">
+            <a class="nav-link nav-link-custom" href="/itinerary/my-trips">
+              <i class="fa-regular fa-bookmark me-1 text-danger"></i>My Trips
+            </a>
+          </li>
         <% } %>
 
-        <a class="nav-link" href="/listings/new">Airbnb your home</a>
+        <li class="nav-item">
+          <a class="nav-link nav-link-custom" href="/listings/new">
+            <i class="fa-solid fa-plus-circle me-1 text-secondary"></i>List Your Stay
+          </a>
+        </li>
 
         <% if(!currUser){ %>
-          <a class="nav-link" href="/signup"><b>Sign up</b></a>
-          <a class="nav-link" href="/login"><b>Login</b></a>
+          <li class="nav-item ms-lg-2">
+            <a class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-semibold" href="/login">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-sm btn-dark rounded-pill px-3 py-1 fw-semibold" href="/signup">Sign up</a>
+          </li>
         <% } %>
 
         <% if(currUser){ %>
-          <a class="nav-link" href="/logout">Logout</a>
+          <li class="nav-item ms-lg-2">
+            <a class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1" href="/logout">Logout</a>
+          </li>
         <% } %>
-      </div>
+      </ul>
 
     </div>
   </div>

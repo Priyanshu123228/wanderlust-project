@@ -16,6 +16,15 @@
         background-color: #fff5f5 !important;
         box-shadow: 0 4px 15px rgba(254, 66, 77, 0.15);
     }
+    .dest-pill-quick {
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .dest-pill-quick:hover {
+        background-color: #fee2e2;
+        color: #fe424d;
+        border-color: #fca5a5;
+    }
 </style>
 
 <div class="row mt-4 mb-5">
@@ -26,39 +35,70 @@
                 <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Wanderlust Smart Planner
             </span>
             <h1 class="fw-bold display-6 mb-2">Plan Your Dream Journey</h1>
-            <p class="text-muted" style="max-width: 550px; margin: 0 auto;">
-                Tell us where you want to go and how you like to travel. Our recommendation engine will craft an optimized day-by-day itinerary and accurate budget breakdown.
+            <p class="text-muted" style="max-width: 580px; margin: 0 auto;">
+                Select your destination and travel preferences. Our planning engine will assemble an optimized day-by-day itinerary, stay recommendations, and accurate budget breakdown.
             </p>
         </div>
 
         <div class="card planner-card border-0 shadow-lg p-4 p-md-5">
-            <form action="/itinerary/generate" method="POST" class="needs-validation" novalidate>
+            <form action="/itinerary/generate" method="POST" class="needs-validation" id="plannerForm" novalidate>
                 
                 <!-- 1. Destination Selection -->
                 <div class="mb-4">
                     <label class="form-label fw-bold h6 text-dark mb-2">
                         <i class="fa-solid fa-location-dot text-danger me-2"></i>1. Where do you want to go?
                     </label>
-                    <select name="destinationName" class="form-select form-select-lg rounded-3 shadow-none" required>
-                        <option value="">-- Choose a Destination --</option>
+                    <select name="destinationName" id="destinationSelect" class="form-select form-select-lg rounded-3 shadow-none" required>
+                        <option value="">-- Choose or Search a Destination --</option>
                         <% if(typeof allDestinations !== 'undefined') { %>
                             <% for(let dest of allDestinations) { %>
-                                <option value="<%= dest.name %>" <%= (prefilledDestination && prefilledDestination.toLowerCase() === dest.name.toLowerCase()) ? 'selected' : '' %>>
+                                <option 
+                                    value="<%= dest.name %>" 
+                                    data-budget-low="<%= dest.estimatedBudget?.low || 1500 %>"
+                                    data-budget-med="<%= dest.estimatedBudget?.medium || 3500 %>"
+                                    data-budget-high="<%= dest.estimatedBudget?.high || 7500 %>"
+                                    <%= (prefilledDestination && prefilledDestination.toLowerCase() === dest.name.toLowerCase()) ? 'selected' : '' %>
+                                >
                                     <%= dest.name %> &bull; <%= dest.location %> (<%= dest.bestTimeToVisit %>)
                                 </option>
                             <% } %>
                         <% } %>
                     </select>
                     <div class="invalid-feedback">Please select a destination.</div>
+
+                    <!-- Quick Destination Pills -->
+                    <div class="d-flex flex-wrap gap-2 mt-2 pt-1 align-items-center">
+                        <small class="text-muted fw-semibold">Popular:</small>
+                        <span class="badge bg-light text-dark border dest-pill-quick py-2 px-3 rounded-pill" onclick="selectQuickDest('Manali')">🏔️ Manali</span>
+                        <span class="badge bg-light text-dark border dest-pill-quick py-2 px-3 rounded-pill" onclick="selectQuickDest('Goa')">🏖️ Goa</span>
+                        <span class="badge bg-light text-dark border dest-pill-quick py-2 px-3 rounded-pill" onclick="selectQuickDest('Jaipur')">🏰 Jaipur</span>
+                        <span class="badge bg-light text-dark border dest-pill-quick py-2 px-3 rounded-pill" onclick="selectQuickDest('Shimla')">🌲 Shimla</span>
+                    </div>
                 </div>
 
-                <!-- 2. Trip Duration & Travelers -->
+                <!-- 2. Travel Dates & Automatic Duration Calculation -->
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         <label class="form-label fw-bold h6 text-dark mb-2">
-                            <i class="fa-regular fa-calendar text-primary me-2"></i>2. Trip Duration (Days)
+                            <i class="fa-regular fa-calendar-days text-primary me-2"></i>2. Travel Dates (Optional)
                         </label>
-                        <div class="input-group input-group-lg">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label small text-muted mb-1">Start Date</label>
+                                <input type="date" id="startDate" class="form-control rounded-3" onchange="calculateDurationFromDates()">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small text-muted mb-1">End Date</label>
+                                <input type="date" id="endDate" class="form-control rounded-3" onchange="calculateDurationFromDates()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-6">
+                        <label class="form-label fw-bold h6 text-dark mb-2">
+                            <i class="fa-regular fa-clock text-primary me-2"></i>Duration
+                        </label>
+                        <div class="input-group">
                             <input 
                                 type="number" 
                                 name="durationDays" 
@@ -71,14 +111,14 @@
                             >
                             <span class="input-group-text bg-light text-muted">Days</span>
                         </div>
-                        <small class="text-muted">Recommended: 2 to 7 days</small>
+                        <small id="durationBadge" class="text-muted d-block mt-1">3 Days / 2 Nights</small>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-3 col-6">
                         <label class="form-label fw-bold h6 text-dark mb-2">
-                            <i class="fa-solid fa-users text-success me-2"></i>3. Number of Travelers
+                            <i class="fa-solid fa-users text-success me-2"></i>Travelers
                         </label>
-                        <div class="input-group input-group-lg">
+                        <div class="input-group">
                             <input 
                                 type="number" 
                                 name="numTravelers" 
@@ -91,14 +131,14 @@
                             >
                             <span class="input-group-text bg-light text-muted">People</span>
                         </div>
-                        <small class="text-muted">Solo, couple, friends, or family</small>
+                        <small class="text-muted d-block mt-1">Adults & Guests</small>
                     </div>
                 </div>
 
                 <!-- 3. Budget Mode Selector -->
                 <div class="mb-4">
                     <label class="form-label fw-bold h6 text-dark mb-2">
-                        <i class="fa-solid fa-wallet text-warning me-2"></i>4. Choose Your Budget Tier
+                        <i class="fa-solid fa-wallet text-warning me-2"></i>3. Choose Your Budget Tier
                     </label>
 
                     <div class="row g-3">
@@ -106,7 +146,7 @@
                             <input type="radio" name="budgetTier" value="LOW" id="budgetLow" class="d-none budget-radio">
                             <label for="budgetLow" class="card budget-card h-100 p-3 rounded-4 border text-center cursor-pointer" role="button">
                                 <span class="badge bg-secondary mb-2">Backpacker / Low</span>
-                                <h6 class="fw-bold mb-1">&#8377;1,500 / day</h6>
+                                <h6 class="fw-bold mb-1" id="budgetLabelLow">&#8377;1,500 / day</h6>
                                 <small class="text-muted">Hostels, local transit & delicious street eats</small>
                             </label>
                         </div>
@@ -115,7 +155,7 @@
                             <input type="radio" name="budgetTier" value="MEDIUM" id="budgetMed" class="d-none budget-radio" checked>
                             <label for="budgetMed" class="card budget-card h-100 p-3 rounded-4 border text-center cursor-pointer" role="button">
                                 <span class="badge bg-primary mb-2">Standard / Medium</span>
-                                <h6 class="fw-bold text-primary mb-1">&#8377;3,500 / day</h6>
+                                <h6 class="fw-bold text-primary mb-1" id="budgetLabelMed">&#8377;3,500 / day</h6>
                                 <small class="text-muted">Quality hotels, popular cafes & top activities</small>
                             </label>
                         </div>
@@ -124,7 +164,7 @@
                             <input type="radio" name="budgetTier" value="HIGH" id="budgetHigh" class="d-none budget-radio">
                             <label for="budgetHigh" class="card budget-card h-100 p-3 rounded-4 border text-center cursor-pointer" role="button">
                                 <span class="badge bg-dark mb-2">Luxury / High</span>
-                                <h6 class="fw-bold mb-1">&#8377;8,000+ / day</h6>
+                                <h6 class="fw-bold mb-1" id="budgetLabelHigh">&#8377;8,000+ / day</h6>
                                 <small class="text-muted">Resorts, private cabs & fine dining</small>
                             </label>
                         </div>
@@ -134,7 +174,7 @@
                 <!-- 4. Travel Interests -->
                 <div class="mb-4">
                     <label class="form-label fw-bold h6 text-dark mb-2">
-                        <i class="fa-solid fa-heart text-danger me-2"></i>5. Select Your Travel Interests (Select multiple)
+                        <i class="fa-solid fa-heart text-danger me-2"></i>4. Select Travel Interests
                     </label>
 
                     <div class="d-flex flex-wrap gap-2">
@@ -145,7 +185,9 @@
                             { name: "Historical", icon: "fa-monument" },
                             { name: "Relaxation", icon: "fa-spa" },
                             { name: "Culture", icon: "fa-masks-theater" },
-                            { name: "Shopping", icon: "fa-bag-shopping" }
+                            { name: "Shopping", icon: "fa-bag-shopping" },
+                            { name: "Photography", icon: "fa-camera" },
+                            { name: "Nightlife", icon: "fa-champagne-glasses" }
                         ]; %>
 
                         <% for(let interest of allInterests) { %>
@@ -166,14 +208,71 @@
                     </div>
                 </div>
 
+                <!-- What's Included Box -->
+                <div class="card border-0 bg-light rounded-4 p-3 mb-4">
+                    <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-circle-check text-success me-2"></i>Your Itinerary Includes:</h6>
+                    <div class="row row-cols-md-2 row-cols-1 g-2 small text-secondary">
+                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Day-by-day morning to evening timeline</div>
+                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Recommended dining & authentic food spots</div>
+                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Suitable stays matched to your budget tier</div>
+                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Attractions prioritized by your interests</div>
+                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Live weather forecast & advisory alerts</div>
+                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Complete transparent budget breakdown</div>
+                    </div>
+                </div>
+
                 <!-- Submit Button -->
-                <div class="mt-4 pt-3 border-top text-center">
+                <div class="mt-4 pt-2 text-center">
                     <button type="submit" class="btn btn-danger btn-lg rounded-pill px-5 py-3 fw-bold shadow" style="background-color: #fe424d; border-color: #fe424d;">
                         <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Generate Smart Itinerary
                     </button>
-                    <p class="text-muted small mt-2 mb-0">Powered by deterministic routing algorithm and instant budget calculations</p>
+                    <p class="text-muted small mt-2 mb-0">
+                        Powered by smart itinerary rules, destination data, route planning and budget calculations.
+                    </p>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    function selectQuickDest(destName) {
+        const select = document.getElementById("destinationSelect");
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value.toLowerCase() === destName.toLowerCase()) {
+                select.selectedIndex = i;
+                break;
+            }
+        }
+    }
+
+    function calculateDurationFromDates() {
+        const startInput = document.getElementById("startDate").value;
+        const endInput = document.getElementById("endDate").value;
+        const durationInput = document.getElementById("durationInput");
+        const badge = document.getElementById("durationBadge");
+
+        if (startInput && endInput) {
+            const start = new Date(startInput);
+            const end = new Date(endInput);
+            const diffTime = end - start;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+            if (diffDays > 0 && diffDays <= 14) {
+                durationInput.value = diffDays;
+                badge.textContent = `${diffDays} Days / ${diffDays > 1 ? diffDays - 1 : 1} Nights`;
+            } else if (diffDays <= 0) {
+                alert("End date must be after or equal to the start date.");
+            }
+        } else {
+            const days = parseInt(durationInput.value) || 3;
+            badge.textContent = `${days} Days / ${days > 1 ? days - 1 : 1} Nights`;
+        }
+    }
+
+    document.getElementById("durationInput").addEventListener("input", function() {
+        const days = parseInt(this.value) || 1;
+        const badge = document.getElementById("durationBadge");
+        badge.textContent = `${days} Days / ${days > 1 ? days - 1 : 1} Nights`;
+    });
+</script>

@@ -19,6 +19,18 @@ router.get("/my-trips", isLoggedIn, wrapAsync(itineraryController.myTrips));
 // Download Complete Trip Itinerary as PDF
 router.get("/:id/download", isLoggedIn, wrapAsync(itineraryController.downloadItineraryPdf));
 
+// Public Read-Only Share Trip Route
+router.get("/:id/share", wrapAsync(itineraryController.shareItinerary));
+
+// Add Item (Stay, Food, Activity, Attraction) to Itinerary Day
+router.post("/:id/add-item", isLoggedIn, wrapAsync(itineraryController.addItemToTrip));
+
+// Remove Item from Itinerary Day
+router.post("/:id/remove-item", isLoggedIn, wrapAsync(itineraryController.removeItemFromTrip));
+
+// API: Fetch User Trips for Add-to-Trip Modals
+router.get("/api/user-trips", wrapAsync(itineraryController.getUserTripsJson));
+
 // Single Trip View
 router.route("/:id")
     .get(wrapAsync(itineraryController.showItinerary))

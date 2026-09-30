@@ -85,16 +85,18 @@
 
     <% for(let rest of allRestaurants) { %>
         <div class="col">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative">
-                <img src="<%= rest.image.url %>" class="card-img-top" alt="<%= rest.name %>" style="height: 200px; object-fit: cover;">
-                
-                <span class="badge bg-dark bg-opacity-75 position-absolute top-0 start-0 m-3 px-2 py-1 rounded-pill small">
-                    <i class="fa-solid fa-location-dot me-1 text-danger"></i><%= rest.destinationName %>
-                </span>
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative travel-card">
+                <div class="position-relative">
+                    <img src="<%= rest.image.url %>" class="card-img-top travel-card-img" alt="<%= rest.name %>" style="height: 220px; object-fit: cover;">
+                    
+                    <span class="badge bg-dark bg-opacity-75 position-absolute top-0 start-0 m-3 px-2 py-1 rounded-pill small">
+                        <i class="fa-solid fa-location-dot me-1 text-danger"></i><%= rest.destinationName %>
+                    </span>
 
-                <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 px-2 py-1 rounded-pill fw-bold small">
-                    <i class="fa-solid fa-star me-1"></i><%= rest.rating || 4.5 %>
-                </span>
+                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 px-2 py-1 rounded-pill fw-bold small">
+                        <i class="fa-solid fa-star me-1"></i><%= rest.rating || 4.5 %>
+                    </span>
+                </div>
 
                 <div class="card-body p-4 d-flex flex-column">
                     <h5 class="card-title fw-bold text-dark mb-1"><%= rest.name %></h5>
@@ -114,15 +116,28 @@
                     </div>
 
                     <!-- Price / Budget Footer -->
-                    <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
-                        <div>
-                            <span class="fw-bold text-dark">&#8377;<%= rest.averagePrice.toLocaleString("en-IN") %></span>
-                            <small class="text-muted">/ person</small>
-                            <span class="badge bg-secondary-subtle text-secondary border ms-1 small"><%= rest.budgetCategory %></span>
-                        </div>
-                        <a href="/restaurants/<%= rest._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                    <div class="mb-3">
+                        <span class="fw-bold text-dark">&#8377;<%= rest.averagePrice.toLocaleString("en-IN") %></span>
+                        <small class="text-muted">/ person</small>
+                        <span class="badge bg-secondary-subtle text-secondary border ms-1 small"><%= rest.budgetCategory %></span>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-auto d-flex gap-2 pt-2 border-top">
+                        <a href="/restaurants/<%= rest._id %>" class="btn btn-sm btn-outline-dark flex-grow-1 rounded-pill">
                             View Details
                         </a>
+                        <button 
+                            type="button" 
+                            class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-semibold btn-add-to-trip"
+                            data-item-id="<%= rest._id %>"
+                            data-item-type="Restaurant"
+                            data-item-title="<%= rest.name %>"
+                            data-destination="<%= rest.destinationName %>"
+                            title="Add this restaurant to your trip"
+                        >
+                            <i class="fa-solid fa-plus me-1"></i> Add to Trip
+                        </button>
                     </div>
                 </div>
             </div>

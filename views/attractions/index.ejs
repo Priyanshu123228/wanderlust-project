@@ -75,16 +75,18 @@
 
     <% for(let attr of allAttractions) { %>
         <div class="col">
-            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative">
-                <img src="<%= attr.image.url %>" class="card-img-top" alt="<%= attr.name %>" style="height: 200px; object-fit: cover;">
-                
-                <span class="badge bg-dark bg-opacity-75 position-absolute top-0 start-0 m-3 px-2 py-1 rounded-pill small">
-                    <i class="fa-solid fa-location-dot me-1 text-danger"></i><%= attr.destinationName %>
-                </span>
+            <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden position-relative travel-card">
+                <div class="position-relative">
+                    <img src="<%= attr.image.url %>" class="card-img-top travel-card-img" alt="<%= attr.name %>" style="height: 220px; object-fit: cover;">
+                    
+                    <span class="badge bg-dark bg-opacity-75 position-absolute top-0 start-0 m-3 px-2 py-1 rounded-pill small">
+                        <i class="fa-solid fa-location-dot me-1 text-danger"></i><%= attr.destinationName %>
+                    </span>
 
-                <span class="badge bg-success position-absolute top-0 end-0 m-3 px-2 py-1 rounded-pill fw-bold small">
-                    <%= attr.category || 'Scenic' %>
-                </span>
+                    <span class="badge bg-success position-absolute top-0 end-0 m-3 px-2 py-1 rounded-pill fw-bold small">
+                        <%= attr.category || 'Scenic' %>
+                    </span>
+                </div>
 
                 <div class="card-body p-4 d-flex flex-column">
                     <div class="d-flex justify-content-between align-items-baseline mb-1">
@@ -98,19 +100,32 @@
                         <%= attr.description %>
                     </p>
 
+                    <!-- Price / Entry Fee -->
+                    <div class="mb-3">
+                        <% if(attr.entryFee === 0) { %>
+                            <span class="badge bg-success-subtle text-success border fw-bold px-2 py-1">Free Entry</span>
+                        <% } else { %>
+                            <span class="fw-bold text-dark">&#8377;<%= attr.entryFee.toLocaleString("en-IN") %></span>
+                            <small class="text-muted">entry fee</small>
+                        <% } %>
+                    </div>
+
                     <!-- Price / Action Footer -->
-                    <div class="mt-auto d-flex justify-content-between align-items-center pt-2 border-top">
-                        <div>
-                            <% if(attr.entryFee === 0) { %>
-                                <span class="badge bg-success-subtle text-success border fw-bold">Free Entry</span>
-                            <% } else { %>
-                                <span class="fw-bold text-dark">&#8377;<%= attr.entryFee.toLocaleString("en-IN") %></span>
-                                <small class="text-muted">entry</small>
-                            <% } %>
-                        </div>
-                        <a href="/attractions/<%= attr._id %>" class="btn btn-sm btn-outline-dark rounded-pill px-3">
-                            View Sight
+                    <div class="mt-auto d-flex gap-2 pt-2 border-top">
+                        <a href="/attractions/<%= attr._id %>" class="btn btn-sm btn-outline-dark flex-grow-1 rounded-pill">
+                            View Details
                         </a>
+                        <button 
+                            type="button" 
+                            class="btn btn-sm btn-success text-white rounded-pill px-3 fw-semibold btn-add-to-trip"
+                            data-item-id="<%= attr._id %>"
+                            data-item-type="Attraction"
+                            data-item-title="<%= attr.name %>"
+                            data-destination="<%= attr.destinationName %>"
+                            title="Add this attraction to your trip"
+                        >
+                            <i class="fa-solid fa-plus me-1"></i> Add to Trip
+                        </button>
                     </div>
                 </div>
             </div>

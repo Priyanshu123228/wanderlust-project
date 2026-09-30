@@ -1,37 +1,97 @@
+:root {
+    --primary-color: #fe424d;
+    --primary-hover: #e0323d;
+    --dest-color: #2563eb;
+    --food-color: #ea580c;
+    --activity-color: #7c3aed;
+    --attraction-color: #16a34a;
+    --dark-slate: #0f172a;
+    --muted-slate: #64748b;
+    --light-bg: #f8fafc;
+    --border-color: #e2e8f0;
+}
+
 body {
     font-family: "Plus Jakarta Sans", sans-serif !important;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    background-color: #fcfdfe;
+    color: #1e293b;
 }
 
 .container {
     flex: 1;
 }
 
-
-/* navbar */
-.navbar {
-    height: 5rem;
-    background-color: white;
-}
-
+/* Global Logo & Icons */
 .fa-compass {
-    color: #fe424d;
-    font-size: 2rem;
+    color: var(--primary-color);
 }
 
-.nav-link {
-    color: #222222 !important;
+/* Category Accent Badges */
+.badge-dest { background-color: #eff6ff; color: var(--dest-color); border: 1px solid #bfdbfe; }
+.badge-stay { background-color: #fff1f2; color: var(--primary-color); border: 1px solid #fecdd3; }
+.badge-food { background-color: #fff7ed; color: var(--food-color); border: 1px solid #fed7aa; }
+.badge-activity { background-color: #faf5ff; color: var(--activity-color); border: 1px solid #e9d5ff; }
+.badge-attraction { background-color: #f0fdf4; color: var(--attraction-color); border: 1px solid #bbf7d0; }
+
+/* Standardized Card Aesthetics */
+.travel-card {
+    border-radius: 1.25rem !important;
+    border: 1px solid var(--border-color) !important;
+    background-color: #ffffff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
 }
 
+.travel-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.08) !important;
+}
+
+.travel-card-img {
+    height: 220px !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    border-top-left-radius: 1.25rem !important;
+    border-top-right-radius: 1.25rem !important;
+}
+
+/* Primary Button Styling */
+.btn-primary-wanderlust {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    border-radius: 9999px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-primary-wanderlust:hover {
+    background-color: var(--primary-hover) !important;
+    border-color: var(--primary-hover) !important;
+    box-shadow: 0 4px 12px rgba(254, 66, 77, 0.25);
+}
+
+/* Empty State Widget */
+.empty-state-box {
+    padding: 3.5rem 1.5rem;
+    text-align: center;
+    background: #ffffff;
+    border-radius: 1.5rem;
+    border: 1px dashed var(--border-color);
+}
+
+/* Footer */
 .f-info-links a {
     text-decoration: none;
-    color: #222222;
+    color: #475569;
+    font-size: 0.88rem;
 }
 
 .f-info-links a:hover {
-    text-decoration: underline;
+    color: var(--primary-color);
 }
 
 .f-info-links,
@@ -46,80 +106,49 @@ body {
 .f-info-socials i {
     font-size: 1.2rem;
     margin-right: 1rem;
+    color: #475569;
+}
+
+.f-info-socials i:hover {
+    color: var(--primary-color);
 }
 
 .f-info {
     display: flex;
-    height: 8rem;
-    background-color: #ebebeb;
+    padding: 2rem 1rem;
+    background-color: #f1f5f9;
+    border-top: 1px solid var(--border-color);
     justify-content: center;
-    align-items: space-evenly;
+    align-items: center;
     text-align: center;
-    flex-wrap: wrap;
-
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-/* cards */
-.listing-card {
-    border: none !important;
-    margin-bottom: 2rem;
-}
-
-.card-img-top {
-    border-radius: 1rem !important;
-    width: 100% !important;
-    object-fit: cover !important;
-}
-
-.card-body {
-    padding: 0 !important;
-}
-
-.card-text p {
-    font-weight: 400;
-}
-
-.listing-link {
-    text-decoration: none;
-}
-
-.card-img-overlay {
-    opacity: 0;
-}
-
-.card-img-overlay:hover {
-    opacity: 0.2;
-    background-color: white;
-}
-
-/* new page */
-.add-btn {
-    background-color: #fe424d !important;
-    border: none !important;
-}
-
-/* Edit page */
-.edit-btn {
-    background-color: #fe424d !important;
-    border: none !important;
-}
-
-/* show page */
-.show-img {
-    height: 30vh;
-}
-
-.btns {
-    display: flex;
-}
-
-.show-card {
-    padding-left: 0;
-    padding-right: 0;
-}
-
-/* map  */
-#map{
-  height: 400px;
-  width: 80vh;
+/* Print Optimization */
+@media print {
+    .navbar,
+    .sticky-top,
+    .btn,
+    .f-info,
+    .filter-bar,
+    .search-form,
+    #itinerary-map,
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt !important;
+    }
+    .card {
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
 }

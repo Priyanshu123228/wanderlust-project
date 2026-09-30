@@ -40,10 +40,22 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
-                    <a href="/itinerary/new?destination=<%= attraction.destinationName %>" class="btn btn-danger rounded-pill px-4" style="background-color: #fe424d; border-color: #fe424d;">
-                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Add to Trip Plan
-                    </a>
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top flex-wrap gap-2">
+                    <div class="d-flex gap-2">
+                        <button 
+                            type="button" 
+                            class="btn btn-success text-white rounded-pill px-4 fw-semibold btn-add-to-trip"
+                            data-item-id="<%= attraction._id %>"
+                            data-item-type="Attraction"
+                            data-item-title="<%= attraction.name %>"
+                            data-destination="<%= attraction.destinationName %>"
+                        >
+                            <i class="fa-solid fa-plus me-1"></i> Add to Trip
+                        </button>
+                        <a href="/itinerary/new?destination=<%= attraction.destinationName %>" class="btn btn-danger rounded-pill px-4" style="background-color: #fe424d; border-color: #fe424d;">
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Plan New Trip
+                        </a>
+                    </div>
 
                     <% if(currUser) { %>
                         <div class="d-flex gap-2">

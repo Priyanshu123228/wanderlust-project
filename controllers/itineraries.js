@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const Itinerary = require("../models/itinerary.js");
 const Destination = require("../models/destination.js");
+const Attraction = require("../models/attraction.js");
+const Activity = require("../models/activity.js");
+const Restaurant = require("../models/restaurant.js");
+const Listing = require("../models/listing.js");
 const { generateSmartItinerary } = require("../utils/itineraryAlgorithm.js");
 const { getDestinationWeather } = require("../utils/weatherService.js");
 const { generateItineraryPdf, sanitizeFilename } = require("../utils/tripPdfGenerator.js");
@@ -224,3 +228,204 @@ module.exports.downloadItineraryPdf = async (req, res) => {
         res.redirect(`/itinerary/${id}`);
     }
 };
+
+// Public Read-Only Shareable Trip View
+module.exports.shareItinerary = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        req.flash("error", "Invalid trip link!");
+        return res.redirect("/destinations");
+    }
+
+    const itinerary = await Itinerary.findById(id).populate("destination");
+    if (!itinerary) {
+        req.flash("error", "Trip itinerary not found!");
+        return res.redirect("/destinations");
+    }
+
+    let weather = { available: false, message: "Weather information is currently unavailable." };
+    try {
+        const destName = itinerary.destinationName || (itinerary.destination ? itinerary.destination.name : null);
+        const coordinates = itinerary.destination?.geometry?.coordinates;
+        if (destName || coordinates) {
+            weather = await getDestinationWeather({ destinationName: destName, coordinates });
+        }
+    } catch (e) {
+        console.error("Error fetching weather for shared itinerary:", e.message);
+    }
+
+    res.render("itineraries/show.ejs", { 
+        itinerary, 
+        weather, 
+        mapToken,
+        isSharedView: true 
+    });
+};
+
+// Add Item (Stay, Restaurant, Activity, Attraction) to Itinerary
+module.exports.addItemToTrip = async (req, res) => {
+    const { id } = req.params;
+    const { itemType, itemId, dayNumber, slot } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id) || !mongoose.Types.ObjectId.isValid(itemId)) {
+        req.flash("error", "Invalid trip or item ID.");
+        return res.redirect("/itinerary/my-trips");
+    }
+
+    const itinerary = await Itinerary.findById(id);
+    if (!itinerary || !itinerary.user.equals(req.user._id)) {
+        req.flash("error", "Trip not found or unauthorized.");
+        return res.redirect("/itinerary/my-trips");
+    }
+
+    const targetDayIndex = (parseInt(dayNumber) || 1) - 1;
+    if (targetDayIndex < 0 || targetDayIndex >= itinerary.dailyPlan.length) {
+        req.flash("error", "Selected day is outside trip duration.");
+        return res.redirect(`/itinerary/${id}`);
+    }
+
+    const targetDay = itinerary.dailyPlan[targetDayIndex];
+    let itemName = "Item";
+
+    if (itemType === "Listing") {
+        const stay = await Listing.findById(itemId);
+        if (stay) {
+            itemName = stay.title;
+            targetDay.nightStay = {
+                listing: stay._id,
+                title: stay.title,
+                location: stay.location,
+                pricePerNight: stay.price || 3500
+            };
+        }
+    } else if (itemType === "Restaurant") {
+        const rest = await Restaurant.findById(itemId);
+        if (rest) {
+            itemName = rest.name;
+            const targetSlot = slot === "dinner" ? "dinner" : "lunch";
+            targetDay[targetSlot] = {
+                restaurant: rest._id,
+                title: rest.name,
+                cuisine: rest.cuisine ? rest.cuisine.join(", ") : "Local Dining",
+                location: rest.location,
+                coordinates: rest.geometry?.coordinates || [77.1892, 32.2432],
+                time: targetSlot === "dinner" ? "08:30 PM - 10:00 PM" : "01:00 PM - 02:30 PM",
+                estimatedCost: rest.averagePrice || 450
+            };
+        }
+    } else if (itemType === "Activity") {
+        const act = await Activity.findById(itemId);
+        if (act) {
+            itemName = act.name;
+            targetDay.afternoon = {
+                type: "Activity",
+                activity: act._id,
+                title: act.name,
+                description: act.description,
+                location: act.location,
+                coordinates: act.geometry?.coordinates || [77.1892, 32.2432],
+                time: "03:00 PM - 05:30 PM",
+                estimatedCost: act.estimatedCost || 1000
+            };
+        }
+    } else if (itemType === "Attraction") {
+        const attr = await Attraction.findById(itemId);
+        if (attr) {
+            itemName = attr.name;
+            const targetSlot = slot === "evening" ? "evening" : "morning";
+            targetDay[targetSlot] = {
+                type: "Attraction",
+                attraction: attr._id,
+                title: attr.name,
+                description: attr.description,
+                location: attr.location,
+                coordinates: attr.geometry?.coordinates || [77.1892, 32.2432],
+                time: targetSlot === "evening" ? "06:00 PM - 08:00 PM" : "09:00 AM - 12:30 PM",
+                estimatedCost: attr.entryFee || 0
+            };
+        }
+    }
+
+    // Recalculate cost breakdown
+    let totalStay = 0;
+    let totalFood = 0;
+    let totalAct = 0;
+    let totalEntry = 0;
+
+    for (let day of itinerary.dailyPlan) {
+        if (day.nightStay?.pricePerNight) totalStay += day.nightStay.pricePerNight;
+        if (day.lunch?.estimatedCost) totalFood += day.lunch.estimatedCost * itinerary.numTravelers;
+        if (day.dinner?.estimatedCost) totalFood += day.dinner.estimatedCost * itinerary.numTravelers;
+        if (day.afternoon?.estimatedCost) totalAct += day.afternoon.estimatedCost * itinerary.numTravelers;
+        if (day.morning?.estimatedCost) totalEntry += day.morning.estimatedCost * itinerary.numTravelers;
+        if (day.evening?.estimatedCost) totalEntry += day.evening.estimatedCost * itinerary.numTravelers;
+    }
+
+    const dailyTransit = itinerary.budgetTier === "LOW" ? 400 : (itinerary.budgetTier === "MEDIUM" ? 900 : 2000);
+    const totalTransit = dailyTransit * itinerary.durationDays;
+
+    itinerary.costBreakdown = {
+        stayTotal: totalStay,
+        foodTotal: totalFood,
+        activitiesTotal: totalAct,
+        entryFeesTotal: totalEntry,
+        estimatedTransportation: totalTransit,
+        grandTotal: totalStay + totalFood + totalAct + totalEntry + totalTransit
+    };
+
+    await itinerary.save();
+    req.flash("success", `Added "${itemName}" to Day ${dayNumber} of your trip!`);
+    res.redirect(`/itinerary/${id}`);
+};
+
+// Remove Item Slot from an Itinerary Day
+module.exports.removeItemFromTrip = async (req, res) => {
+    const { id } = req.params;
+    const { dayNumber, slot } = req.body;
+
+    const itinerary = await Itinerary.findById(id);
+    if (!itinerary || !itinerary.user.equals(req.user._id)) {
+        req.flash("error", "Unauthorized or trip not found!");
+        return res.redirect("/itinerary/my-trips");
+    }
+
+    const dayIndex = (parseInt(dayNumber) || 1) - 1;
+    if (dayIndex >= 0 && dayIndex < itinerary.dailyPlan.length) {
+        const day = itinerary.dailyPlan[dayIndex];
+        if (slot === "afternoon") {
+            day.afternoon = {
+                type: "Activity",
+                title: "Free Leisure Time / Relaxation",
+                description: "Flexible time for personal exploration, photography, or cafe hopping.",
+                location: itinerary.destinationName,
+                time: "03:00 PM - 05:30 PM",
+                estimatedCost: 0
+            };
+        } else if (slot === "morning" || slot === "evening") {
+            day[slot] = {
+                type: "Attraction",
+                title: `${slot === "morning" ? "Morning" : "Evening"} Scenic Walk`,
+                description: "Scenic walk around local streets and viewpoints.",
+                location: itinerary.destinationName,
+                time: slot === "morning" ? "09:00 AM - 12:30 PM" : "06:00 PM - 08:00 PM",
+                estimatedCost: 0
+            };
+        }
+
+        await itinerary.save();
+        req.flash("success", `Updated Day ${dayNumber} schedule.`);
+    }
+
+    res.redirect(`/itinerary/${id}`);
+};
+
+// API: Get User Trips for Add-to-Trip Modals
+module.exports.getUserTripsJson = async (req, res) => {
+    if (!req.isAuthenticated()) {
+        return res.json({ success: false, trips: [], loggedIn: false });
+    }
+    const trips = await Itinerary.find({ user: req.user._id }, "title destinationName durationDays dailyPlan createdAt").sort({ createdAt: -1 });
+    return res.json({ success: true, trips, loggedIn: true });
+};
+

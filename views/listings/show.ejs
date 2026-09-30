@@ -69,15 +69,27 @@
                     </div>
                 </div>
 
-                <!-- Plan Trip CTA for Destination -->
-                <div class="card border-0 bg-light rounded-4 p-3 my-4 d-flex flex-row align-items-center justify-content-between">
+                <!-- Plan Trip & Add to Trip CTA for Destination -->
+                <div class="card border-0 bg-light rounded-4 p-3 my-4 d-flex flex-row align-items-center justify-content-between flex-wrap gap-2">
                     <div>
                         <h6 class="fw-bold mb-1"><i class="fa-solid fa-wand-magic-sparkles text-danger me-2"></i>Traveling to this region?</h6>
-                        <small class="text-muted">Generate a personalized multi-day itinerary around this stay.</small>
+                        <small class="text-muted">Add to your existing trip or generate a personalized itinerary.</small>
                     </div>
-                    <a href="/itinerary/new?destination=<%= listing.destinationName || listing.location %>" class="btn btn-sm btn-danger rounded-pill px-3 py-2 fw-bold" style="background-color: #fe424d; border-color: #fe424d;">
-                        Plan Trip Here
-                    </a>
+                    <div class="d-flex gap-2">
+                        <button 
+                            type="button" 
+                            class="btn btn-sm btn-outline-dark rounded-pill px-3 py-2 fw-semibold btn-add-to-trip"
+                            data-item-id="<%= listing._id %>"
+                            data-item-type="Listing"
+                            data-item-title="<%= listing.title %>"
+                            data-destination="<%= listing.destinationName || listing.location %>"
+                        >
+                            <i class="fa-solid fa-plus me-1"></i> Add to Trip
+                        </button>
+                        <a href="/itinerary/new?destination=<%= listing.destinationName || listing.location %>" class="btn btn-sm btn-danger rounded-pill px-3 py-2 fw-bold" style="background-color: #fe424d; border-color: #fe424d;">
+                            Plan Trip Here
+                        </a>
+                    </div>
                 </div>
 
                 <% if(currUser && listing.owner && currUser._id.equals(listing.owner._id)){ %>

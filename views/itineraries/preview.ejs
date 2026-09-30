@@ -55,118 +55,183 @@
             </div>
         </div>
 
-        <!-- Day by Day Content -->
-        <div class="mb-4">
-            <h4 class="fw-bold mb-3"><i class="fa-solid fa-route text-danger me-2"></i>Day-by-Day Schedule</h4>
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3" id="previewTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active rounded-pill px-4 fw-semibold" id="itinerary-tab" data-bs-toggle="tab" data-bs-target="#itinerary-pane" type="button" role="tab">
+                    <i class="fa-solid fa-route me-1"></i> Day-by-Day Plan
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4 fw-semibold text-secondary" id="map-tab" data-bs-toggle="tab" data-bs-target="#map-pane" type="button" role="tab">
+                    <i class="fa-solid fa-map-location-dot me-1 text-danger"></i> Route Map
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link rounded-pill px-4 fw-semibold text-secondary" id="weather-tab" data-bs-toggle="tab" data-bs-target="#weather-pane" type="button" role="tab">
+                    <i class="fa-solid fa-cloud-sun me-1 text-warning"></i> Weather
+                </button>
+            </li>
+        </ul>
 
-            <% for(let day of plan.dailyPlan) { %>
-                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
-                    <div class="card-header bg-dark text-white p-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <h5 class="fw-bold mb-0"><i class="fa-regular fa-calendar-check text-warning me-1"></i>Day <%= day.dayNumber %></h5>
-                            <small class="text-light opacity-75 d-none d-md-inline">&bull; <%= day.morning.title %></small>
+        <!-- Tab Content Panes -->
+        <div class="tab-content" id="previewTabContent">
+            
+            <!-- 1. Day-by-Day Itinerary Tab -->
+            <div class="tab-pane fade show active" id="itinerary-pane" role="tabpanel">
+                <% for(let day of plan.dailyPlan) { %>
+                    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                        <div class="card-header bg-dark text-white p-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="fw-bold mb-0"><i class="fa-regular fa-calendar-check text-warning me-1"></i>Day <%= day.dayNumber %></h5>
+                                <small class="text-light opacity-75 d-none d-md-inline">&bull; <%= day.morning.title %></small>
+                            </div>
+                            <% if(day.weather && day.weather.available) { %>
+                                <span class="badge bg-light text-dark px-3 py-1 rounded-pill small fw-semibold">
+                                    <%= day.weather.emoji || '🌤️' %> <%= day.weather.temperature %>&deg;C &bull; <%= day.weather.condition %>
+                                </span>
+                            <% } else { %>
+                                <span class="badge bg-secondary bg-opacity-50 text-light px-2 py-1 rounded-pill small" style="font-size: 0.75rem;">
+                                    <i class="fa-solid fa-cloud me-1"></i>Weather unavailable
+                                </span>
+                            <% } %>
                         </div>
-                        <% if(day.weather && day.weather.available) { %>
-                            <span class="badge bg-light text-dark px-3 py-1 rounded-pill small fw-semibold">
-                                <%= day.weather.emoji || '🌤️' %> <%= day.weather.temperature %>&deg;C &bull; <%= day.weather.condition %>
-                            </span>
-                        <% } else { %>
-                            <span class="badge bg-secondary bg-opacity-50 text-light px-2 py-1 rounded-pill small" style="font-size: 0.75rem;">
-                                <i class="fa-solid fa-cloud me-1"></i>Weather unavailable
-                            </span>
-                        <% } %>
-                    </div>
 
-                    <div class="card-body p-4">
-                        <!-- Weather Advisory Note for the Day -->
-                        <% if(day.weather && day.weather.available) { %>
-                            <div class="p-3 mb-4 rounded-3 border-0 bg-light d-flex align-items-start gap-3">
-                                <span class="fs-4"><%= day.weather.emoji || '🌤️' %></span>
-                                <div class="w-100">
-                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
-                                        <strong class="text-dark"><%= day.weather.condition %> (<%= day.weather.tempMin %>&deg;C - <%= day.weather.tempMax %>&deg;C)</strong>
-                                        <% if(day.weather.rainProbability > 0) { %>
-                                            <span class="badge bg-info-subtle text-info-emphasis rounded-pill small"><i class="fa-solid fa-umbrella me-1"></i><%= day.weather.rainProbability %>% rain chance</span>
-                                        <% } %>
+                        <div class="card-body p-4">
+                            <!-- Weather Advisory Note for the Day -->
+                            <% if(day.weather && day.weather.available) { %>
+                                <div class="p-3 mb-4 rounded-3 border-0 bg-light d-flex align-items-start gap-3">
+                                    <span class="fs-4"><%= day.weather.emoji || '🌤️' %></span>
+                                    <div class="w-100">
+                                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-1">
+                                            <strong class="text-dark"><%= day.weather.condition %> (<%= day.weather.tempMin %>&deg;C - <%= day.weather.tempMax %>&deg;C)</strong>
+                                            <% if(day.weather.rainProbability > 0) { %>
+                                                <span class="badge bg-info-subtle text-info-emphasis rounded-pill small"><i class="fa-solid fa-umbrella me-1"></i><%= day.weather.rainProbability %>% rain chance</span>
+                                            <% } %>
+                                        </div>
+                                        <p class="text-secondary small mb-0 mt-1">
+                                            <%= day.weather.suggestion || 'Weather conditions are suitable for planned activities.' %>
+                                        </p>
                                     </div>
-                                    <p class="text-secondary small mb-0 mt-1">
-                                        <%= day.weather.suggestion || 'Weather conditions are suitable for planned activities.' %>
-                                    </p>
+                                </div>
+                            <% } %>
+
+                            <!-- Morning -->
+                            <div class="timeline-card pb-4">
+                                <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1"></div>
+                                <span class="badge slot-badge-morning px-2 py-1 rounded-pill small fw-bold">MORNING &bull; <%= day.morning.time %></span>
+                                <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.morning.title %></h6>
+                                <p class="text-secondary small mb-1"><%= day.morning.description %></p>
+                                <div class="small text-muted">
+                                    <i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.morning.location %>
+                                    <% if(day.morning.estimatedCost > 0) { %>
+                                        &bull; <span class="fw-semibold text-dark">&#8377;<%= day.morning.estimatedCost.toLocaleString("en-IN") %> entry</span>
+                                    <% } else { %>
+                                        &bull; <span class="badge bg-success-subtle text-success">Free Entry</span>
+                                    <% } %>
                                 </div>
                             </div>
-                        <% } %>
 
-                        <!-- Morning -->
-                        <div class="timeline-card pb-4">
-                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1"></div>
-                            <span class="badge slot-badge-morning px-2 py-1 rounded-pill small fw-bold">MORNING &bull; <%= day.morning.time %></span>
-                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.morning.title %></h6>
-                            <p class="text-secondary small mb-1"><%= day.morning.description %></p>
-                            <div class="small text-muted">
-                                <i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.morning.location %>
-                                <% if(day.morning.estimatedCost > 0) { %>
-                                    &bull; <span class="fw-semibold text-dark">&#8377;<%= day.morning.estimatedCost.toLocaleString("en-IN") %> entry</span>
-                                <% } else { %>
-                                    &bull; <span class="badge bg-success-subtle text-success">Free Entry</span>
-                                <% } %>
+                            <!-- Lunch -->
+                            <div class="timeline-card pb-4">
+                                <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #f39c12; box-shadow: 0 0 0 2px #f39c12;"></div>
+                                <span class="badge slot-badge-lunch px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-utensils me-1"></i>LUNCH &bull; <%= day.lunch.time %></span>
+                                <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.lunch.title %></h6>
+                                <p class="text-secondary small mb-1">Cuisine: <strong><%= day.lunch.cuisine %></strong> &bull; Avg. &#8377;<%= day.lunch.estimatedCost.toLocaleString("en-IN") %>/person</p>
+                                <small class="text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.lunch.location %></small>
                             </div>
-                        </div>
 
-                        <!-- Lunch -->
-                        <div class="timeline-card pb-4">
-                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #f39c12; box-shadow: 0 0 0 2px #f39c12;"></div>
-                            <span class="badge slot-badge-lunch px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-utensils me-1"></i>LUNCH &bull; <%= day.lunch.time %></span>
-                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.lunch.title %></h6>
-                            <p class="text-secondary small mb-1">Cuisine: <strong><%= day.lunch.cuisine %></strong> &bull; Avg. &#8377;<%= day.lunch.estimatedCost.toLocaleString("en-IN") %>/person</p>
-                            <small class="text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.lunch.location %></small>
-                        </div>
-
-                        <!-- Afternoon -->
-                        <div class="timeline-card pb-4">
-                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #8e44ad; box-shadow: 0 0 0 2px #8e44ad;"></div>
-                            <span class="badge slot-badge-afternoon px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-person-hiking me-1"></i>AFTERNOON &bull; <%= day.afternoon.time %></span>
-                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.afternoon.title %></h6>
-                            <p class="text-secondary small mb-1"><%= day.afternoon.description %></p>
-                            <div class="small text-muted">
-                                <i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.afternoon.location %>
-                                &bull; <span class="fw-semibold text-dark">&#8377;<%= day.afternoon.estimatedCost.toLocaleString("en-IN") %> /person</span>
+                            <!-- Afternoon -->
+                            <div class="timeline-card pb-4">
+                                <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #8e44ad; box-shadow: 0 0 0 2px #8e44ad;"></div>
+                                <span class="badge slot-badge-afternoon px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-person-hiking me-1"></i>AFTERNOON &bull; <%= day.afternoon.time %></span>
+                                <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.afternoon.title %></h6>
+                                <p class="text-secondary small mb-1"><%= day.afternoon.description %></p>
+                                <div class="small text-muted">
+                                    <i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.afternoon.location %>
+                                    &bull; <span class="fw-semibold text-dark">&#8377;<%= day.afternoon.estimatedCost.toLocaleString("en-IN") %> /person</span>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Evening -->
-                        <div class="timeline-card pb-4">
-                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #e74c3c; box-shadow: 0 0 0 2px #e74c3c;"></div>
-                            <span class="badge slot-badge-evening px-2 py-1 rounded-pill small fw-bold"><i class="fa-regular fa-moon me-1"></i>EVENING &bull; <%= day.evening.time %></span>
-                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.evening.title %></h6>
-                            <p class="text-secondary small mb-1"><%= day.evening.description %></p>
-                            <small class="text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.evening.location %></small>
-                        </div>
+                            <!-- Evening -->
+                            <div class="timeline-card pb-4">
+                                <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #e74c3c; box-shadow: 0 0 0 2px #e74c3c;"></div>
+                                <span class="badge slot-badge-evening px-2 py-1 rounded-pill small fw-bold"><i class="fa-regular fa-moon me-1"></i>EVENING &bull; <%= day.evening.time %></span>
+                                <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.evening.title %></h6>
+                                <p class="text-secondary small mb-1"><%= day.evening.description %></p>
+                                <small class="text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.evening.location %></small>
+                            </div>
 
-                        <!-- Dinner -->
-                        <div class="timeline-card pb-4">
-                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #34495e; box-shadow: 0 0 0 2px #34495e;"></div>
-                            <span class="badge slot-badge-dinner px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-wine-glass me-1"></i>DINNER &bull; <%= day.dinner.time %></span>
-                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.dinner.title %></h6>
-                            <p class="text-secondary small mb-1">Cuisine: <strong><%= day.dinner.cuisine %></strong> &bull; Avg. &#8377;<%= day.dinner.estimatedCost.toLocaleString("en-IN") %>/person</p>
-                            <small class="text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.dinner.location %></small>
-                        </div>
+                            <!-- Dinner -->
+                            <div class="timeline-card pb-4">
+                                <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #34495e; box-shadow: 0 0 0 2px #34495e;"></div>
+                                <span class="badge slot-badge-dinner px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-wine-glass me-1"></i>DINNER &bull; <%= day.dinner.time %></span>
+                                <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.dinner.title %></h6>
+                                <p class="text-secondary small mb-1">Cuisine: <strong><%= day.dinner.cuisine %></strong> &bull; Avg. &#8377;<%= day.dinner.estimatedCost.toLocaleString("en-IN") %>/person</p>
+                                <small class="text-muted"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.dinner.location %></small>
+                            </div>
 
-                        <!-- Night Stay -->
-                        <div class="timeline-card">
-                            <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #27ae60; box-shadow: 0 0 0 2px #27ae60;"></div>
-                            <span class="badge slot-badge-stay px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-bed me-1"></i>NIGHT STAY</span>
-                            <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.nightStay.title %></h6>
-                            <p class="text-muted small mb-0"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.nightStay.location %> &bull; &#8377;<%= day.nightStay.pricePerNight.toLocaleString("en-IN") %> /night</p>
+                            <!-- Night Stay -->
+                            <div class="timeline-card">
+                                <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="background-color: #27ae60; box-shadow: 0 0 0 2px #27ae60;"></div>
+                                <span class="badge slot-badge-stay px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-bed me-1"></i>NIGHT STAY</span>
+                                <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.nightStay.title %></h6>
+                                <p class="text-muted small mb-0"><i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.nightStay.location %> &bull; &#8377;<%= day.nightStay.pricePerNight.toLocaleString("en-IN") %> /night</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            <% } %>
-        </div>
+                <% } %>
+            </div>
 
-        <!-- Map Section -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-            <h5 class="fw-bold mb-3"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Trip Route & Points of Interest</h5>
-            <div id="itinerary-map" class="rounded-4 border" style="height: 380px; width: 100%;"></div>
+            <!-- 2. Interactive Map Tab -->
+            <div class="tab-pane fade" id="map-pane" role="tabpanel">
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Trip Route & Points of Interest</h5>
+                    <p class="text-muted small mb-3">Explore interactive geocoded locations for your planned attractions, experiences, restaurants, and stays.</p>
+                    <div id="itinerary-map" class="rounded-4 border" style="height: 480px; width: 100%;"></div>
+                </div>
+            </div>
+
+            <!-- 3. Weather Forecast Tab -->
+            <div class="tab-pane fade" id="weather-pane" role="tabpanel">
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0"><i class="fa-solid fa-cloud-sun text-warning me-2"></i>Destination Weather Forecast</h5>
+                        <span class="badge bg-light text-secondary border">OpenWeatherMap Live Data</span>
+                    </div>
+
+                    <% if(plan.weather && plan.weather.available) { %>
+                        <div class="row g-3 mb-4">
+                            <% for(let day of plan.dailyPlan) { %>
+                                <% if(day.weather && day.weather.available) { %>
+                                    <div class="col-md-6 col-12">
+                                        <div class="card h-100 border rounded-4 p-3 bg-light">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h6 class="fw-bold mb-0">Day <%= day.dayNumber %></h6>
+                                                <span class="fs-4"><%= day.weather.emoji || '🌤️' %></span>
+                                            </div>
+                                            <div class="d-flex align-items-baseline gap-2 mb-1">
+                                                <h4 class="fw-bold mb-0 text-dark"><%= day.weather.temperature %>&deg;C</h4>
+                                                <small class="text-muted">(Min: <%= day.weather.tempMin %>&deg;C / Max: <%= day.weather.tempMax %>&deg;C)</small>
+                                            </div>
+                                            <p class="text-secondary small mb-2"><%= day.weather.condition %></p>
+                                            <div class="p-2 rounded-3 bg-white border small text-muted">
+                                                <i class="fa-solid fa-circle-info text-primary me-1"></i><%= day.weather.suggestion %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% } %>
+                            <% } %>
+                        </div>
+                    <% } else { %>
+                        <div class="text-center py-5">
+                            <i class="fa-solid fa-cloud-sun-rain fa-3x text-muted mb-3"></i>
+                            <h6 class="text-secondary">Weather information currently unavailable</h6>
+                            <p class="text-muted small">Live OpenWeatherMap integration is active and will refresh when connection is available.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -291,5 +356,12 @@
         });
 
         map.addControl(new mapboxgl.NavigationControl());
+
+        const mapTab = document.getElementById("map-tab");
+        if (mapTab) {
+            mapTab.addEventListener("shown.bs.tab", () => {
+                map.resize();
+            });
+        }
     }
 </script>

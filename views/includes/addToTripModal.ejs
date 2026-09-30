@@ -1,0 +1,253 @@
+<!-- Universal Add to Trip Modal -->
+<div class="modal fade" id="addToTripModal" tabindex="-1" aria-labelledby="addToTripModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 bg-light rounded-top-4 pb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                        <i class="fa-solid fa-plus fw-bold"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-0" id="addToTripModalLabel">Add to Itinerary</h5>
+                        <small class="text-muted" id="modalItemSubtitle">Select a trip and schedule slot</small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4" id="modalBodyContent">
+                <!-- Loading State -->
+                <div id="modalLoadingState" class="text-center py-4">
+                    <div class="spinner-border text-danger" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-2 small">Loading your trips...</p>
+                </div>
+
+                <!-- Not Logged In State -->
+                <div id="modalNotLoggedInState" class="text-center py-3 d-none">
+                    <i class="fa-solid fa-user-lock fa-3x text-muted mb-3"></i>
+                    <h6 class="fw-bold text-dark">Login Required</h6>
+                    <p class="text-muted small mb-3">Please sign in to your Wanderlust account to add places to your saved trips.</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="/login" class="btn btn-danger rounded-pill px-4" style="background-color: #fe424d; border-color: #fe424d;">
+                            <i class="fa-solid fa-right-to-bracket me-1"></i> Login
+                        </a>
+                        <a id="modalPlanNewLinkNotLogged" href="/itinerary/new" class="btn btn-outline-secondary rounded-pill px-3">
+                            Plan New Trip
+                        </a>
+                    </div>
+                </div>
+
+                <!-- No Trips State -->
+                <div id="modalNoTripsState" class="text-center py-3 d-none">
+                    <i class="fa-solid fa-map-location-dot fa-3x text-muted mb-3"></i>
+                    <h6 class="fw-bold text-dark">No Saved Trips Found</h6>
+                    <p class="text-muted small mb-3">You don't have any active itineraries yet. Create a trip with our Smart Planner to start adding custom places.</p>
+                    <a id="modalPlanNewLink" href="/itinerary/new" class="btn btn-danger rounded-pill px-4 fw-bold" style="background-color: #fe424d; border-color: #fe424d;">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Plan a New Trip
+                    </a>
+                </div>
+
+                <!-- Form Selection State -->
+                <form id="addToTripForm" action="" method="POST" class="d-none">
+                    <input type="hidden" name="itemType" id="modalInputItemType">
+                    <input type="hidden" name="itemId" id="modalInputItemId">
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Item Selected</label>
+                        <div class="p-2 bg-light rounded-3 border d-flex align-items-center gap-2">
+                            <span class="badge bg-danger rounded-pill px-2 py-1" id="modalItemTypeBadge">Item</span>
+                            <span class="fw-semibold text-dark text-truncate" id="modalItemTitle">Item Title</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="modalSelectTrip" class="form-label small fw-bold text-muted">Select Trip</label>
+                        <select id="modalSelectTrip" class="form-select rounded-3 shadow-none" required>
+                            <!-- Populated dynamically via JS -->
+                        </select>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label for="modalSelectDay" class="form-label small fw-bold text-muted">Trip Day</label>
+                            <select name="dayNumber" id="modalSelectDay" class="form-select rounded-3 shadow-none" required>
+                                <option value="1">Day 1</option>
+                            </select>
+                        </div>
+                        <div class="col-6" id="slotSelectionContainer">
+                            <label for="modalSelectSlot" class="form-label small fw-bold text-muted">Schedule Slot</label>
+                            <select name="slot" id="modalSelectSlot" class="form-select rounded-3 shadow-none" required>
+                                <option value="morning">Morning</option>
+                                <option value="lunch">Lunch</option>
+                                <option value="afternoon">Afternoon</option>
+                                <option value="evening">Evening</option>
+                                <option value="dinner">Dinner</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 pt-2">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill flex-grow-1" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger rounded-pill flex-grow-1 fw-bold" style="background-color: #fe424d; border-color: #fe424d;">
+                            <i class="fa-solid fa-plus me-1"></i> Confirm Add
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const modalEl = document.getElementById("addToTripModal");
+        if (!modalEl) return;
+
+        const modal = new bootstrap.Modal(modalEl);
+        const loadingState = document.getElementById("modalLoadingState");
+        const notLoggedInState = document.getElementById("modalNotLoggedInState");
+        const noTripsState = document.getElementById("modalNoTripsState");
+        const tripForm = document.getElementById("addToTripForm");
+
+        const inputItemType = document.getElementById("modalInputItemType");
+        const inputItemId = document.getElementById("modalInputItemId");
+        const itemTypeBadge = document.getElementById("modalItemTypeBadge");
+        const itemTitle = document.getElementById("modalItemTitle");
+        const selectTrip = document.getElementById("modalSelectTrip");
+        const selectDay = document.getElementById("modalSelectDay");
+        const selectSlot = document.getElementById("modalSelectSlot");
+        const slotContainer = document.getElementById("slotSelectionContainer");
+        const planNewLink = document.getElementById("modalPlanNewLink");
+        const planNewLinkNotLogged = document.getElementById("modalPlanNewLinkNotLogged");
+
+        let cachedTrips = null;
+        let isUserLoggedIn = null;
+
+        // Listen for clicks on all .btn-add-to-trip triggers
+        document.addEventListener("click", async (e) => {
+            const btn = e.target.closest(".btn-add-to-trip");
+            if (!btn) return;
+
+            e.preventDefault();
+
+            const itemId = btn.getAttribute("data-item-id");
+            const itemType = btn.getAttribute("data-item-type");
+            const title = btn.getAttribute("data-item-title");
+            const destination = btn.getAttribute("data-destination") || "";
+
+            inputItemId.value = itemId;
+            inputItemType.value = itemType;
+            itemTitle.textContent = title;
+            itemTypeBadge.textContent = itemType;
+
+            if (planNewLink) planNewLink.href = `/itinerary/new?destination=${encodeURIComponent(destination)}`;
+            if (planNewLinkNotLogged) planNewLinkNotLogged.href = `/itinerary/new?destination=${encodeURIComponent(destination)}`;
+
+            // Configure slot options based on itemType
+            configureSlotsForItemType(itemType);
+
+            // Show loading view
+            loadingState.classList.remove("d-none");
+            notLoggedInState.classList.add("d-none");
+            noTripsState.classList.add("d-none");
+            tripForm.classList.add("d-none");
+
+            modal.show();
+
+            // Fetch user trips if not cached
+            if (cachedTrips === null) {
+                try {
+                    const res = await fetch("/itinerary/api/user-trips");
+                    const data = await res.json();
+                    isUserLoggedIn = data.loggedIn;
+                    cachedTrips = data.trips || [];
+                } catch (err) {
+                    console.error("Error fetching trips for modal:", err);
+                    isUserLoggedIn = false;
+                    cachedTrips = [];
+                }
+            }
+
+            loadingState.classList.add("d-none");
+
+            if (!isUserLoggedIn) {
+                notLoggedInState.classList.remove("d-none");
+            } else if (!cachedTrips || cachedTrips.length === 0) {
+                noTripsState.classList.remove("d-none");
+            } else {
+                // Populate trip dropdown
+                selectTrip.innerHTML = "";
+                let matchedIndex = 0;
+
+                cachedTrips.forEach((trip, idx) => {
+                    const opt = document.createElement("option");
+                    opt.value = trip._id;
+                    opt.textContent = `${trip.title} (${trip.destinationName} • ${trip.durationDays} Days)`;
+                    opt.dataset.days = trip.durationDays || 3;
+                    selectTrip.appendChild(opt);
+
+                    if (destination && trip.destinationName && trip.destinationName.toLowerCase() === destination.toLowerCase()) {
+                        matchedIndex = idx;
+                    }
+                });
+
+                selectTrip.selectedIndex = matchedIndex;
+                updateDayOptions();
+
+                selectTrip.onchange = () => {
+                    updateDayOptions();
+                    updateFormAction();
+                };
+
+                updateFormAction();
+                tripForm.classList.remove("d-none");
+            }
+        });
+
+        function configureSlotsForItemType(type) {
+            selectSlot.innerHTML = "";
+            if (type === "Listing") {
+                selectSlot.innerHTML = `<option value="nightStay">Night Stay (Accommodation)</option>`;
+            } else if (type === "Restaurant") {
+                selectSlot.innerHTML = `
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                `;
+            } else if (type === "Activity") {
+                selectSlot.innerHTML = `
+                    <option value="afternoon">Afternoon Experience</option>
+                `;
+            } else if (type === "Attraction") {
+                selectSlot.innerHTML = `
+                    <option value="morning">Morning Visit</option>
+                    <option value="evening">Evening Visit</option>
+                `;
+            } else {
+                selectSlot.innerHTML = `
+                    <option value="morning">Morning</option>
+                    <option value="afternoon">Afternoon</option>
+                    <option value="evening">Evening</option>
+                `;
+            }
+        }
+
+        function updateDayOptions() {
+            const selectedOpt = selectTrip.options[selectTrip.selectedIndex];
+            const daysCount = parseInt(selectedOpt?.dataset.days) || 3;
+            selectDay.innerHTML = "";
+            for (let i = 1; i <= daysCount; i++) {
+                const opt = document.createElement("option");
+                opt.value = i;
+                opt.textContent = `Day ${i}`;
+                selectDay.appendChild(opt);
+            }
+        }
+
+        function updateFormAction() {
+            const tripId = selectTrip.value;
+            tripForm.action = `/itinerary/${tripId}/add-item`;
+        }
+    });
+</script>
