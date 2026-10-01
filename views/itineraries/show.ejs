@@ -43,6 +43,18 @@
     .trip-hero-badge i {
         color: #fef08a !important;
     }
+
+    .share-channel-btn {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        border-color: #e2e8f0 !important;
+        background-color: #ffffff !important;
+    }
+    .share-channel-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+        border-color: #cbd5e1 !important;
+        background-color: #f8fafc !important;
+    }
 </style>
 
 <div class="row mt-4 mb-5">
@@ -364,23 +376,92 @@
 <!-- Share Trip Modal -->
 <div class="modal fade" id="shareTripModal" tabindex="-1" aria-labelledby="shareTripModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold" id="shareTripModalLabel">
-                    <i class="fa-solid fa-share-nodes text-danger me-2"></i>Share Your Itinerary
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body py-4">
-                <p class="text-secondary small mb-3">Anyone with this link can view this complete travel plan, day-by-day itinerary, route map, and budget breakdown in read-only mode.</p>
-                <div class="input-group">
-                    <input type="text" id="shareLinkInput" class="form-control rounded-start-pill px-3" readonly value="">
-                    <button class="btn btn-danger rounded-end-pill px-4 fw-bold" type="button" id="copyShareBtn" onclick="copyShareUrl()" style="background-color: #fe424d; border-color: #fe424d;">
-                        <i class="fa-regular fa-copy me-1"></i> Copy
-                    </button>
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 bg-light rounded-top-4 pb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                        <i class="fa-solid fa-share-nodes"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-0" id="shareTripModalLabel">Share Your Itinerary</h5>
+                        <small class="text-muted"><%= itinerary.title %> &bull; <%= itinerary.destinationName %></small>
+                    </div>
                 </div>
-                <div id="copySuccessAlert" class="small text-success fw-semibold mt-2 d-none">
-                    <i class="fa-solid fa-check me-1"></i> Link copied to clipboard!
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-secondary small mb-3">
+                    Anyone with this link can view this complete travel plan, day-by-day itinerary, route map, and budget breakdown in read-only mode.
+                </p>
+
+                <!-- Copy Link Section -->
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted text-uppercase tracking-wider mb-1">Shareable Link</label>
+                    <div class="input-group">
+                        <input type="text" id="shareLinkInput" class="form-control rounded-start-pill px-3 shadow-none border" readonly value="">
+                        <button class="btn btn-danger rounded-end-pill px-4 fw-bold shadow-sm" type="button" id="copyShareBtn" onclick="copyShareUrl()" style="background-color: #fe424d; border-color: #fe424d;">
+                            <i class="fa-regular fa-copy me-1"></i> Copy Link
+                        </button>
+                    </div>
+                    <div id="copySuccessAlert" class="small text-success fw-semibold mt-2 d-none">
+                        <i class="fa-solid fa-circle-check me-1"></i> Link copied to clipboard!
+                    </div>
+                </div>
+
+                <!-- Share Via Channels Section -->
+                <div class="mb-2">
+                    <label class="form-label small fw-bold text-muted text-uppercase tracking-wider mb-2">Share via</label>
+                    <div class="row row-cols-3 g-2">
+                        <!-- WhatsApp -->
+                        <div class="col">
+                            <a id="shareWhatsappBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-light border rounded-3 w-100 py-2 d-flex flex-column align-items-center justify-content-center text-decoration-none shadow-sm h-100 share-channel-btn">
+                                <i class="fa-brands fa-whatsapp fs-4 text-success mb-1"></i>
+                                <span class="small fw-semibold text-dark">WhatsApp</span>
+                            </a>
+                        </div>
+                        <!-- Telegram -->
+                        <div class="col">
+                            <a id="shareTelegramBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-light border rounded-3 w-100 py-2 d-flex flex-column align-items-center justify-content-center text-decoration-none shadow-sm h-100 share-channel-btn">
+                                <i class="fa-brands fa-telegram fs-4 text-primary mb-1"></i>
+                                <span class="small fw-semibold text-dark">Telegram</span>
+                            </a>
+                        </div>
+                        <!-- Email -->
+                        <div class="col">
+                            <a id="shareEmailBtn" href="#" class="btn btn-light border rounded-3 w-100 py-2 d-flex flex-column align-items-center justify-content-center text-decoration-none shadow-sm h-100 share-channel-btn">
+                                <i class="fa-regular fa-envelope fs-4 text-danger mb-1"></i>
+                                <span class="small fw-semibold text-dark">Email</span>
+                            </a>
+                        </div>
+                        <!-- X / Twitter -->
+                        <div class="col">
+                            <a id="shareTwitterBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-light border rounded-3 w-100 py-2 d-flex flex-column align-items-center justify-content-center text-decoration-none shadow-sm h-100 share-channel-btn">
+                                <i class="fa-brands fa-x-twitter fs-4 text-dark mb-1"></i>
+                                <span class="small fw-semibold text-dark">X / Twitter</span>
+                            </a>
+                        </div>
+                        <!-- Facebook -->
+                        <div class="col">
+                            <a id="shareFacebookBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-light border rounded-3 w-100 py-2 d-flex flex-column align-items-center justify-content-center text-decoration-none shadow-sm h-100 share-channel-btn">
+                                <i class="fa-brands fa-facebook fs-4 text-primary mb-1"></i>
+                                <span class="small fw-semibold text-dark">Facebook</span>
+                            </a>
+                        </div>
+                        <!-- Copy Quick -->
+                        <div class="col">
+                            <button type="button" onclick="copyShareUrl()" class="btn btn-light border rounded-3 w-100 py-2 d-flex flex-column align-items-center justify-content-center text-decoration-none shadow-sm h-100 share-channel-btn">
+                                <i class="fa-regular fa-copy fs-4 text-secondary mb-1"></i>
+                                <span class="small fw-semibold text-dark">Copy Link</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Web Share API Button (shown dynamically if supported) -->
+                <div id="nativeShareContainer" class="mt-3 d-none">
+                    <button type="button" id="nativeShareBtn" onclick="triggerNativeShare()" class="btn btn-outline-danger rounded-pill w-100 fw-bold py-2">
+                        <i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Share via Device Apps
+                    </button>
                 </div>
             </div>
         </div>
@@ -391,10 +472,66 @@
     const mapToken = "<%= mapToken || '' %>";
     const dailyPlan = <%- JSON.stringify(itinerary.dailyPlan) %>;
 
-    // Set Share URL
+    // Set Share URL & Channel Links
     const shareUrl = `${window.location.origin}/itinerary/<%= itinerary._id %>/share`;
+    const tripTitle = <%- JSON.stringify(itinerary.title) %>;
+    const destName = <%- JSON.stringify(itinerary.destinationName || 'Trip') %>;
+    const shareText = `Check out this travel itinerary for ${destName}: "${tripTitle}" on Wanderlust!`;
+
     const shareInput = document.getElementById("shareLinkInput");
     if (shareInput) shareInput.value = shareUrl;
+
+    // WhatsApp Link
+    const whatsappBtn = document.getElementById("shareWhatsappBtn");
+    if (whatsappBtn) {
+        whatsappBtn.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + '\n' + shareUrl)}`;
+    }
+
+    // Telegram Link
+    const telegramBtn = document.getElementById("shareTelegramBtn");
+    if (telegramBtn) {
+        telegramBtn.href = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+    }
+
+    // Email Link
+    const emailBtn = document.getElementById("shareEmailBtn");
+    if (emailBtn) {
+        const subject = encodeURIComponent(`Travel Plan: ${tripTitle} (${destName})`);
+        const body = encodeURIComponent(`Hi,\n\nI wanted to share this Wanderlust trip itinerary with you:\n\n${tripTitle} - ${destName}\n\nView the complete day-by-day plan, route map, and budget breakdown here:\n${shareUrl}\n\nEnjoy!`);
+        emailBtn.href = `mailto:?subject=${subject}&body=${body}`;
+    }
+
+    // X / Twitter Link
+    const twitterBtn = document.getElementById("shareTwitterBtn");
+    if (twitterBtn) {
+        twitterBtn.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`;
+    }
+
+    // Facebook Link
+    const facebookBtn = document.getElementById("shareFacebookBtn");
+    if (facebookBtn) {
+        facebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
+    }
+
+    // Web Share API check
+    if (navigator.share) {
+        const nativeContainer = document.getElementById("nativeShareContainer");
+        if (nativeContainer) nativeContainer.classList.remove("d-none");
+    }
+
+    function triggerNativeShare() {
+        if (navigator.share) {
+            navigator.share({
+                title: tripTitle,
+                text: shareText,
+                url: shareUrl
+            }).catch((err) => {
+                if (err.name !== "AbortError") {
+                    console.log("Native share failed:", err);
+                }
+            });
+        }
+    }
 
     function copyShareUrl() {
         const input = document.getElementById("shareLinkInput");
@@ -446,40 +583,5 @@
                 map.resize();
             });
         }
-    }
-</script>|| '' %>";
-    const dailyPlan = <%- JSON.stringify(itinerary.dailyPlan) %>;
-
-    if (mapToken && document.getElementById("itinerary-map")) {
-        mapboxgl.accessToken = mapToken;
-        
-        let centerCoordinates = [77.1892, 32.2432];
-        if (dailyPlan.length > 0 && dailyPlan[0].morning.coordinates) {
-            centerCoordinates = dailyPlan[0].morning.coordinates;
-        }
-
-        const map = new mapboxgl.Map({
-            container: "itinerary-map",
-            style: "mapbox://styles/mapbox/streets-v12",
-            center: centerCoordinates,
-            zoom: 11
-        });
-
-        dailyPlan.forEach((day) => {
-            if (day.morning.coordinates && day.morning.coordinates.length === 2) {
-                new mapboxgl.Marker({ color: "#fe424d" })
-                    .setLngLat(day.morning.coordinates)
-                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>Day ${day.dayNumber} (Morning)</strong><p>${day.morning.title}</p>`))
-                    .addTo(map);
-            }
-            if (day.afternoon.coordinates && day.afternoon.coordinates.length === 2) {
-                new mapboxgl.Marker({ color: "#8e44ad" })
-                    .setLngLat(day.afternoon.coordinates)
-                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>Day ${day.dayNumber} (Afternoon)</strong><p>${day.afternoon.title}</p>`))
-                    .addTo(map);
-            }
-        });
-
-        map.addControl(new mapboxgl.NavigationControl());
     }
 </script>
