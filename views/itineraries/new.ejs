@@ -1,251 +1,726 @@
 <% layout("/layouts/boilerplate") %>
 
 <style>
-    .planner-card {
-        border-radius: 1.5rem;
-        background: white;
+    /* =========================================================
+       Smart Planner UI & Design Tokens
+       ========================================================= */
+    :root {
+        --wl-primary: #fe424d;
+        --wl-primary-hover: #e03742;
+        --wl-primary-subtle: #fff5f5;
+        --wl-primary-border: #fecdd3;
+        --wl-text-main: #0f172a;
+        --wl-text-muted: #64748b;
+        --wl-border: #e2e8f0;
+        --wl-card-bg: #ffffff;
+        --wl-card-radius: 1.25rem;
     }
-    .interest-checkbox:checked + .interest-label {
-        background-color: #fe424d !important;
-        color: white !important;
-        border-color: #fe424d !important;
-        box-shadow: 0 4px 12px rgba(254, 66, 77, 0.3);
+
+    .planner-wrapper {
+        max-width: 880px;
+        margin: 0 auto;
     }
-    .budget-radio:checked + .budget-card {
-        border-color: #fe424d !important;
-        background-color: #fff5f5 !important;
-        box-shadow: 0 4px 15px rgba(254, 66, 77, 0.15);
+
+    /* Hero Section */
+    .planner-hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        background-color: #fff1f2;
+        color: var(--wl-primary);
+        border: 1px solid var(--wl-primary-border);
+        font-size: 0.8125rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
     }
-    .dest-pill-quick {
+
+    .planner-hero-title {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: var(--wl-text-main);
+        letter-spacing: -0.03em;
+        line-height: 1.2;
+    }
+
+    .planner-hero-subtitle {
+        color: var(--wl-text-muted);
+        font-size: 1rem;
+        line-height: 1.6;
+        max-width: 580px;
+        margin: 0 auto;
+    }
+
+    /* Planner Card */
+    .planner-main-card {
+        background: var(--wl-card-bg);
+        border: 1px solid var(--wl-border);
+        border-radius: var(--wl-card-radius);
+        box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.04), 0 20px 25px -5px rgba(15, 23, 42, 0.02);
+    }
+
+    .planner-section {
+        padding-bottom: 1.75rem;
+        margin-bottom: 1.75rem;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .planner-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-step-badge {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background-color: #fff1f2;
+        color: var(--wl-primary);
+        font-weight: 700;
+        font-size: 0.8125rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--wl-text-main);
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    /* Destination Selector & Chips */
+    .custom-select-destination {
+        border-radius: 0.75rem;
+        border: 1.5px solid var(--wl-border);
+        padding: 0.85rem 1.15rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--wl-text-main);
+        transition: all 0.2s ease;
+        background-color: #f8fafc;
+    }
+
+    .custom-select-destination:focus {
+        background-color: #ffffff;
+        border-color: var(--wl-primary);
+        box-shadow: 0 0 0 4px rgba(254, 66, 77, 0.12);
+    }
+
+    .dest-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background-color: #ffffff;
+        border: 1px solid var(--wl-border);
+        color: #475569;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem;
+        border-radius: 9999px;
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
     }
-    .dest-pill-quick:hover {
+
+    .dest-chip:hover {
+        background-color: #fff1f2;
+        border-color: var(--wl-primary-border);
+        color: var(--wl-primary);
+        transform: translateY(-1px);
+    }
+
+    .dest-chip.active {
+        background-color: var(--wl-primary);
+        border-color: var(--wl-primary);
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(254, 66, 77, 0.25);
+    }
+
+    /* Inputs Styling */
+    .form-control-modern {
+        border-radius: 0.75rem;
+        border: 1.5px solid var(--wl-border);
+        padding: 0.65rem 0.95rem;
+        font-size: 0.9375rem;
+        color: var(--wl-text-main);
+        transition: all 0.2s ease;
+        background-color: #f8fafc;
+    }
+
+    .form-control-modern:focus {
+        background-color: #ffffff;
+        border-color: var(--wl-primary);
+        box-shadow: 0 0 0 3px rgba(254, 66, 77, 0.12);
+    }
+
+    .duration-indicator-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background-color: #f1f5f9;
+        color: #475569;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.2rem 0.6rem;
+        border-radius: 9999px;
+        margin-top: 0.35rem;
+    }
+
+    /* Budget Selection Cards */
+    .budget-card-label {
+        display: block;
+        height: 100%;
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+
+    .budget-pricing-card {
+        border: 1.5px solid var(--wl-border);
+        border-radius: 1rem;
+        padding: 1.15rem 1rem;
+        background-color: #ffffff;
+        text-align: center;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .budget-pricing-card:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+    }
+
+    .budget-radio-input:checked + .budget-pricing-card {
+        border-color: var(--wl-primary);
+        background-color: var(--wl-primary-subtle);
+        box-shadow: 0 8px 20px rgba(254, 66, 77, 0.14);
+        transform: translateY(-2px);
+    }
+
+    .budget-tier-pill {
+        display: inline-block;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.2rem 0.65rem;
+        border-radius: 9999px;
+        margin-bottom: 0.5rem;
+    }
+
+    .budget-tier-pill.low { background-color: #f1f5f9; color: #475569; }
+    .budget-tier-pill.med { background-color: #e0f2fe; color: #0369a1; }
+    .budget-tier-pill.high { background-color: #f5f3ff; color: #6d28d9; }
+
+    .budget-radio-input:checked + .budget-pricing-card .budget-tier-pill {
         background-color: #fee2e2;
-        color: #fe424d;
-        border-color: #fca5a5;
+        color: var(--wl-primary);
+    }
+
+    .budget-card-price {
+        font-size: 1.125rem;
+        font-weight: 800;
+        color: var(--wl-text-main);
+        margin-bottom: 0.25rem;
+    }
+
+    .budget-card-desc {
+        font-size: 0.78125rem;
+        color: var(--wl-text-muted);
+        line-height: 1.4;
+        margin-bottom: 0;
+    }
+
+    .budget-card-check {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        border: 1.5px solid #cbd5e1;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        color: transparent;
+        transition: all 0.2s ease;
+    }
+
+    .budget-radio-input:checked + .budget-pricing-card .budget-card-check {
+        border-color: var(--wl-primary);
+        background: var(--wl-primary);
+        color: #ffffff;
+    }
+
+    /* Travel Interests Chips */
+    .interest-chip-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        background-color: #ffffff;
+        border: 1.5px solid var(--wl-border);
+        color: #334155;
+        font-size: 0.875rem;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+    }
+
+    .interest-chip-label:hover {
+        border-color: #cbd5e1;
+        background-color: #f8fafc;
+        transform: translateY(-1px);
+    }
+
+    .interest-checkbox-input:checked + .interest-chip-label {
+        background-color: var(--wl-primary);
+        border-color: var(--wl-primary);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(254, 66, 77, 0.25);
+        transform: translateY(-1px);
+    }
+
+    /* What's Included Box */
+    .includes-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .includes-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--wl-text-main);
+        margin-bottom: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+    }
+
+    .includes-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.84375rem;
+        color: #475569;
+        line-height: 1.45;
+    }
+
+    .includes-icon {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #dcfce7;
+        color: #15803d;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+
+    /* Strong CTA Button */
+    .btn-generate-itinerary {
+        background-color: var(--wl-primary);
+        border: 1.5px solid var(--wl-primary);
+        color: #ffffff;
+        font-size: 1.0625rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        padding: 0.95rem 2.75rem;
+        border-radius: 9999px;
+        box-shadow: 0 8px 20px rgba(254, 66, 77, 0.28);
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-generate-itinerary:hover {
+        background-color: var(--wl-primary-hover);
+        border-color: var(--wl-primary-hover);
+        color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(254, 66, 77, 0.35);
+    }
+
+    .btn-generate-itinerary:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(254, 66, 77, 0.25);
+    }
+
+    .planner-disclaimer {
+        font-size: 0.78125rem;
+        color: var(--wl-text-muted);
+        margin-top: 0.75rem;
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 767.98px) {
+        .planner-hero-title {
+            font-size: 1.85rem;
+        }
+        .planner-main-card {
+            padding: 1.5rem 1.25rem !important;
+        }
+        .btn-generate-itinerary {
+            width: 100%;
+            padding: 0.875rem 1.5rem;
+        }
     }
 </style>
 
 <div class="row mt-4 mb-5">
-    <div class="col-lg-8 offset-lg-2 col-12">
-        <!-- Hero Header -->
-        <div class="text-center mb-4">
-            <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill fw-bold mb-2">
-                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Wanderlust Smart Planner
-            </span>
-            <h1 class="fw-bold display-6 mb-2">Plan Your Dream Journey</h1>
-            <p class="text-muted" style="max-width: 580px; margin: 0 auto;">
-                Select your destination and travel preferences. Our planning engine will assemble an optimized day-by-day itinerary, stay recommendations, and accurate budget breakdown.
-            </p>
-        </div>
+    <div class="col-12">
+        <div class="planner-wrapper">
+            
+            <!-- 1. Hero Header Section -->
+            <div class="text-center mb-4 pb-1">
+                <div class="mb-2">
+                    <span class="planner-hero-badge">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Wanderlust Smart Planner
+                    </span>
+                </div>
+                <h1 class="planner-hero-title mb-2">Plan Your Dream Journey</h1>
+                <p class="planner-hero-subtitle">
+                    Select your destination and travel preferences. Our planning engine will assemble an optimized day-by-day itinerary, stay recommendations, and accurate budget breakdown.
+                </p>
+            </div>
 
-        <div class="card planner-card border-0 shadow-lg p-4 p-md-5">
-            <form action="/itinerary/generate" method="POST" class="needs-validation" id="plannerForm" novalidate>
-                
-                <!-- 1. Destination Selection -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold h6 text-dark mb-2">
-                        <i class="fa-solid fa-location-dot text-danger me-2"></i>1. Where do you want to go?
-                    </label>
-                    <select name="destinationName" id="destinationSelect" class="form-select form-select-lg rounded-3 shadow-none" required>
-                        <option value="">-- Choose or Search a Destination --</option>
-                        <% if(typeof allDestinations !== 'undefined') { %>
-                            <% for(let dest of allDestinations) { %>
-                                <option 
-                                    value="<%= dest.name %>" 
-                                    data-budget-low="<%= dest.estimatedBudget?.low || 1500 %>"
-                                    data-budget-med="<%= dest.estimatedBudget?.medium || 3500 %>"
-                                    data-budget-high="<%= dest.estimatedBudget?.high || 7500 %>"
-                                    <%= (prefilledDestination && prefilledDestination.toLowerCase() === dest.name.toLowerCase()) ? 'selected' : '' %>
-                                >
-                                    <%= dest.name %> &bull; <%= dest.location %> (<%= dest.bestTimeToVisit %>)
-                                </option>
+            <!-- 2. Main Planner Card -->
+            <div class="card planner-main-card p-4 p-md-5">
+                <form action="/itinerary/generate" method="POST" class="needs-validation" id="plannerForm" novalidate>
+                    
+                    <!-- SECTION 1: Destination Selection -->
+                    <div class="planner-section">
+                        <label class="section-title" for="destinationSelect">
+                            <span class="section-step-badge">1</span>
+                            Where do you want to go?
+                        </label>
+
+                        <select name="destinationName" id="destinationSelect" class="form-select custom-select-destination" required>
+                            <option value="">-- Choose or Search a Destination --</option>
+                            <% if(typeof allDestinations !== 'undefined') { %>
+                                <% for(let dest of allDestinations) { %>
+                                    <option 
+                                        value="<%= dest.name %>" 
+                                        data-budget-low="<%= dest.estimatedBudget?.low || 1500 %>"
+                                        data-budget-med="<%= dest.estimatedBudget?.medium || 3500 %>"
+                                        data-budget-high="<%= dest.estimatedBudget?.high || 7500 %>"
+                                        <%= (prefilledDestination && prefilledDestination.toLowerCase() === dest.name.toLowerCase()) ? 'selected' : '' %>
+                                    >
+                                        <%= dest.name %> &bull; <%= dest.location %> (<%= dest.bestTimeToVisit || 'All Year' %>)
+                                    </option>
+                                <% } %>
                             <% } %>
-                        <% } %>
-                    </select>
-                    <div class="invalid-feedback">Please select a destination.</div>
+                        </select>
+                        <div class="invalid-feedback small mt-1">Please select a destination to continue.</div>
 
-                    <!-- Quick Destination Pills -->
-                    <div class="d-flex flex-wrap gap-2 mt-2 pt-1 align-items-center">
-                        <small class="text-muted fw-semibold">Popular:</small>
-                        <span class="badge bg-light text-dark border dest-pill-quick py-2 px-3 rounded-pill" onclick="selectQuickDest('Manali')">🏔️ Manali</span>
-                        <span class="badge bg-light text-dark border dest-pill-quick py-2 px-3 rounded-pill" onclick="selectQuickDest('Goa')">🏖️ Goa</span>
-                        <span class="badge bg-light text-dark border dest-pill-quick py-2 px-3 rounded-pill" onclick="selectQuickDest('Jaipur')">🏰 Jaipur</span>
-                        <span class="badge bg-light text-dark border dest-pill-quick py-2 px-3 rounded-pill" onclick="selectQuickDest('Shimla')">🌲 Shimla</span>
+                        <!-- Quick Popular Destination Chips -->
+                        <div class="d-flex flex-wrap gap-2 mt-3 align-items-center">
+                            <small class="text-muted fw-bold me-1" style="font-size: 0.78125rem;">Popular:</small>
+                            <span class="dest-chip" data-dest="Manali" onclick="selectQuickDest('Manali')">
+                                <i class="fa-solid fa-mountain text-muted"></i> Manali
+                            </span>
+                            <span class="dest-chip" data-dest="Goa" onclick="selectQuickDest('Goa')">
+                                <i class="fa-solid fa-umbrella-beach text-muted"></i> Goa
+                            </span>
+                            <span class="dest-chip" data-dest="Jaipur" onclick="selectQuickDest('Jaipur')">
+                                <i class="fa-solid fa-chess-rook text-muted"></i> Jaipur
+                            </span>
+                            <span class="dest-chip" data-dest="Shimla" onclick="selectQuickDest('Shimla')">
+                                <i class="fa-solid fa-tree text-muted"></i> Shimla
+                            </span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- 2. Travel Dates & Automatic Duration Calculation -->
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold h6 text-dark mb-2">
-                            <i class="fa-regular fa-calendar-days text-primary me-2"></i>2. Travel Dates (Optional)
-                        </label>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <label class="form-label small text-muted mb-1">Start Date</label>
-                                <input type="date" id="startDate" class="form-control rounded-3" onchange="calculateDurationFromDates()">
+                    <!-- SECTION 2: Travel Dates, Duration & Travelers -->
+                    <div class="planner-section">
+                        <div class="section-title">
+                            <span class="section-step-badge">2</span>
+                            Dates, Duration & Travelers
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Dates Column -->
+                            <div class="col-lg-6 col-12">
+                                <label class="form-label small fw-bold text-muted mb-1">
+                                    <i class="fa-regular fa-calendar-days text-danger me-1"></i> Travel Dates (Optional)
+                                </label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="date" id="startDate" class="form-control form-control-modern" onchange="calculateDurationFromDates()" title="Start Date">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="date" id="endDate" class="form-control form-control-modern" onchange="calculateDurationFromDates()" title="End Date">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label small text-muted mb-1">End Date</label>
-                                <input type="date" id="endDate" class="form-control rounded-3" onchange="calculateDurationFromDates()">
+
+                            <!-- Duration Column -->
+                            <div class="col-lg-3 col-6">
+                                <label for="durationInput" class="form-label small fw-bold text-muted mb-1">
+                                    <i class="fa-regular fa-clock text-primary me-1"></i> Duration
+                                </label>
+                                <div class="input-group">
+                                    <input 
+                                        type="number" 
+                                        name="durationDays" 
+                                        id="durationInput" 
+                                        value="3" 
+                                        min="1" 
+                                        max="14" 
+                                        class="form-control form-control-modern" 
+                                        required
+                                    >
+                                    <span class="input-group-text bg-light border-start-0 text-muted" style="border-radius: 0 0.75rem 0.75rem 0; border: 1.5px solid var(--wl-border); font-size: 0.875rem;">Days</span>
+                                </div>
+                                <div class="duration-indicator-pill" id="durationBadge">
+                                    <i class="fa-solid fa-moon text-secondary"></i> 3 Days / 2 Nights
+                                </div>
+                            </div>
+
+                            <!-- Travelers Column -->
+                            <div class="col-lg-3 col-6">
+                                <label for="travelersInput" class="form-label small fw-bold text-muted mb-1">
+                                    <i class="fa-solid fa-users text-success me-1"></i> Travelers
+                                </label>
+                                <div class="input-group">
+                                    <input 
+                                        type="number" 
+                                        name="numTravelers" 
+                                        id="travelersInput" 
+                                        value="2" 
+                                        min="1" 
+                                        max="20" 
+                                        class="form-control form-control-modern" 
+                                        required
+                                    >
+                                    <span class="input-group-text bg-light border-start-0 text-muted" style="border-radius: 0 0.75rem 0.75rem 0; border: 1.5px solid var(--wl-border); font-size: 0.875rem;">Guests</span>
+                                </div>
+                                <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Adults & Children</small>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-md-3 col-6">
-                        <label class="form-label fw-bold h6 text-dark mb-2">
-                            <i class="fa-regular fa-clock text-primary me-2"></i>Duration
-                        </label>
-                        <div class="input-group">
-                            <input 
-                                type="number" 
-                                name="durationDays" 
-                                id="durationInput" 
-                                value="3" 
-                                min="1" 
-                                max="14" 
-                                class="form-control rounded-3" 
-                                required
-                            >
-                            <span class="input-group-text bg-light text-muted">Days</span>
-                        </div>
-                        <small id="durationBadge" class="text-muted d-block mt-1">3 Days / 2 Nights</small>
-                    </div>
-
-                    <div class="col-md-3 col-6">
-                        <label class="form-label fw-bold h6 text-dark mb-2">
-                            <i class="fa-solid fa-users text-success me-2"></i>Travelers
-                        </label>
-                        <div class="input-group">
-                            <input 
-                                type="number" 
-                                name="numTravelers" 
-                                id="travelersInput" 
-                                value="2" 
-                                min="1" 
-                                max="20" 
-                                class="form-control rounded-3" 
-                                required
-                            >
-                            <span class="input-group-text bg-light text-muted">People</span>
-                        </div>
-                        <small class="text-muted d-block mt-1">Adults & Guests</small>
-                    </div>
-                </div>
-
-                <!-- 3. Budget Mode Selector -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold h6 text-dark mb-2">
-                        <i class="fa-solid fa-wallet text-warning me-2"></i>3. Choose Your Budget Tier
-                    </label>
-
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <input type="radio" name="budgetTier" value="LOW" id="budgetLow" class="d-none budget-radio">
-                            <label for="budgetLow" class="card budget-card h-100 p-3 rounded-4 border text-center cursor-pointer" role="button">
-                                <span class="badge bg-secondary mb-2">Backpacker / Low</span>
-                                <h6 class="fw-bold mb-1" id="budgetLabelLow">&#8377;1,500 / day</h6>
-                                <small class="text-muted">Hostels, local transit & delicious street eats</small>
-                            </label>
+                    <!-- SECTION 3: Budget Tier Pricing Cards -->
+                    <div class="planner-section">
+                        <div class="section-title">
+                            <span class="section-step-badge">3</span>
+                            Choose Your Budget Tier
                         </div>
 
-                        <div class="col-md-4">
-                            <input type="radio" name="budgetTier" value="MEDIUM" id="budgetMed" class="d-none budget-radio" checked>
-                            <label for="budgetMed" class="card budget-card h-100 p-3 rounded-4 border text-center cursor-pointer" role="button">
-                                <span class="badge bg-primary mb-2">Standard / Medium</span>
-                                <h6 class="fw-bold text-primary mb-1" id="budgetLabelMed">&#8377;3,500 / day</h6>
-                                <small class="text-muted">Quality hotels, popular cafes & top activities</small>
-                            </label>
-                        </div>
-
-                        <div class="col-md-4">
-                            <input type="radio" name="budgetTier" value="HIGH" id="budgetHigh" class="d-none budget-radio">
-                            <label for="budgetHigh" class="card budget-card h-100 p-3 rounded-4 border text-center cursor-pointer" role="button">
-                                <span class="badge bg-dark mb-2">Luxury / High</span>
-                                <h6 class="fw-bold mb-1" id="budgetLabelHigh">&#8377;8,000+ / day</h6>
-                                <small class="text-muted">Resorts, private cabs & fine dining</small>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 4. Travel Interests -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold h6 text-dark mb-2">
-                        <i class="fa-solid fa-heart text-danger me-2"></i>4. Select Travel Interests
-                    </label>
-
-                    <div class="d-flex flex-wrap gap-2">
-                        <% const allInterests = [
-                            { name: "Adventure", icon: "fa-person-hiking" },
-                            { name: "Nature", icon: "fa-tree" },
-                            { name: "Food", icon: "fa-utensils" },
-                            { name: "Historical", icon: "fa-monument" },
-                            { name: "Relaxation", icon: "fa-spa" },
-                            { name: "Culture", icon: "fa-masks-theater" },
-                            { name: "Shopping", icon: "fa-bag-shopping" },
-                            { name: "Photography", icon: "fa-camera" },
-                            { name: "Nightlife", icon: "fa-champagne-glasses" }
-                        ]; %>
-
-                        <% for(let interest of allInterests) { %>
-                            <div>
-                                <input 
-                                    type="checkbox" 
-                                    name="interests" 
-                                    value="<%= interest.name %>" 
-                                    id="interest_<%= interest.name %>" 
-                                    class="d-none interest-checkbox"
-                                    <%= (interest.name === 'Adventure' || interest.name === 'Nature' || interest.name === 'Food') ? 'checked' : '' %>
-                                >
-                                <label for="interest_<%= interest.name %>" class="btn btn-outline-secondary rounded-pill px-3 py-2 interest-label" role="button">
-                                    <i class="fa-solid <%= interest.icon %> me-1"></i> <%= interest.name %>
+                        <div class="row g-3">
+                            <!-- Backpacker / Low -->
+                            <div class="col-md-4 col-12">
+                                <label class="budget-card-label" for="budgetLow">
+                                    <input type="radio" name="budgetTier" value="LOW" id="budgetLow" class="d-none budget-radio-input">
+                                    <div class="budget-pricing-card">
+                                        <div class="budget-card-check"><i class="fa-solid fa-check"></i></div>
+                                        <div>
+                                            <span class="budget-tier-pill low">Backpacker</span>
+                                            <div class="budget-card-price" id="budgetLabelLow">&#8377;1,500 <small class="text-muted fw-normal" style="font-size: 0.75rem;">/ day</small></div>
+                                        </div>
+                                        <p class="budget-card-desc">Hostels, local transit & delicious local street food</p>
+                                    </div>
                                 </label>
                             </div>
-                        <% } %>
-                    </div>
-                </div>
 
-                <!-- What's Included Box -->
-                <div class="card border-0 bg-light rounded-4 p-3 mb-4">
-                    <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-circle-check text-success me-2"></i>Your Itinerary Includes:</h6>
-                    <div class="row row-cols-md-2 row-cols-1 g-2 small text-secondary">
-                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Day-by-day morning to evening timeline</div>
-                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Recommended dining & authentic food spots</div>
-                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Suitable stays matched to your budget tier</div>
-                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Attractions prioritized by your interests</div>
-                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Live weather forecast & advisory alerts</div>
-                        <div class="col"><i class="fa-solid fa-check text-success me-1"></i> Complete transparent budget breakdown</div>
-                    </div>
-                </div>
+                            <!-- Standard / Medium (Default) -->
+                            <div class="col-md-4 col-12">
+                                <label class="budget-card-label" for="budgetMed">
+                                    <input type="radio" name="budgetTier" value="MEDIUM" id="budgetMed" class="d-none budget-radio-input" checked>
+                                    <div class="budget-pricing-card">
+                                        <div class="budget-card-check"><i class="fa-solid fa-check"></i></div>
+                                        <div>
+                                            <span class="budget-tier-pill med">Standard</span>
+                                            <div class="budget-card-price" id="budgetLabelMed">&#8377;3,500 <small class="text-muted fw-normal" style="font-size: 0.75rem;">/ day</small></div>
+                                        </div>
+                                        <p class="budget-card-desc">Quality hotels, popular cafes & guided activities</p>
+                                    </div>
+                                </label>
+                            </div>
 
-                <!-- Submit Button -->
-                <div class="mt-4 pt-2 text-center">
-                    <button type="submit" class="btn btn-danger btn-lg rounded-pill px-5 py-3 fw-bold shadow" style="background-color: #fe424d; border-color: #fe424d;">
-                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Generate Smart Itinerary
-                    </button>
-                    <p class="text-muted small mt-2 mb-0">
-                        Powered by smart itinerary rules, destination data, route planning and budget calculations.
-                    </p>
-                </div>
-            </form>
+                            <!-- Luxury / High -->
+                            <div class="col-md-4 col-12">
+                                <label class="budget-card-label" for="budgetHigh">
+                                    <input type="radio" name="budgetTier" value="HIGH" id="budgetHigh" class="d-none budget-radio-input">
+                                    <div class="budget-pricing-card">
+                                        <div class="budget-card-check"><i class="fa-solid fa-check"></i></div>
+                                        <div>
+                                            <span class="budget-tier-pill high">Luxury</span>
+                                            <div class="budget-card-price" id="budgetLabelHigh">&#8377;7,500+ <small class="text-muted fw-normal" style="font-size: 0.75rem;">/ day</small></div>
+                                        </div>
+                                        <p class="budget-card-desc">Premium resorts, private cabs & fine dining</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 4: Travel Interests -->
+                    <div class="planner-section">
+                        <div class="section-title">
+                            <span class="section-step-badge">4</span>
+                            Select Travel Interests
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2">
+                            <% const allInterests = [
+                                { name: "Adventure", icon: "fa-person-hiking" },
+                                { name: "Nature", icon: "fa-tree" },
+                                { name: "Food", icon: "fa-utensils" },
+                                { name: "Historical", icon: "fa-monument" },
+                                { name: "Relaxation", icon: "fa-spa" },
+                                { name: "Culture", icon: "fa-masks-theater" },
+                                { name: "Shopping", icon: "fa-bag-shopping" },
+                                { name: "Photography", icon: "fa-camera" },
+                                { name: "Nightlife", icon: "fa-champagne-glasses" }
+                            ]; %>
+
+                            <% for(let interest of allInterests) { %>
+                                <div>
+                                    <input 
+                                        type="checkbox" 
+                                        name="interests" 
+                                        value="<%= interest.name %>" 
+                                        id="interest_<%= interest.name %>" 
+                                        class="d-none interest-checkbox-input"
+                                        <%= (interest.name === 'Adventure' || interest.name === 'Nature' || interest.name === 'Food') ? 'checked' : '' %>
+                                    >
+                                    <label for="interest_<%= interest.name %>" class="interest-chip-label" role="button">
+                                        <i class="fa-solid <%= interest.icon %>"></i> <%= interest.name %>
+                                    </label>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 5: "Your Itinerary Includes" Box -->
+                    <div class="includes-box mb-4">
+                        <div class="includes-title">
+                            <i class="fa-solid fa-circle-check text-success"></i> Your itinerary includes
+                        </div>
+                        <div class="row row-cols-md-2 row-cols-1 g-3">
+                            <div class="col">
+                                <div class="includes-item">
+                                    <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
+                                    <span>Day-by-day morning to evening timeline</span>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="includes-item">
+                                    <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
+                                    <span>Recommended dining & authentic food spots</span>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="includes-item">
+                                    <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
+                                    <span>Suitable stays matched to your budget tier</span>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="includes-item">
+                                    <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
+                                    <span>Attractions prioritized by your interests</span>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="includes-item">
+                                    <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
+                                    <span>Live weather forecast & advisory alerts</span>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="includes-item">
+                                    <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
+                                    <span>Complete transparent budget breakdown</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 6: Generate Itinerary CTA -->
+                    <div class="text-center pt-2">
+                        <button type="submit" class="btn btn-generate-itinerary">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Smart Itinerary
+                        </button>
+                        <p class="planner-disclaimer">
+                            Powered by smart itinerary rules, destination data, route planning and budget calculations.
+                        </p>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
+    // Quick destination selection with active chip highlight & dynamic budget updates
     function selectQuickDest(destName) {
         const select = document.getElementById("destinationSelect");
         for (let i = 0; i < select.options.length; i++) {
             if (select.options[i].value.toLowerCase() === destName.toLowerCase()) {
                 select.selectedIndex = i;
+                updateDestinationUi(select.options[i]);
                 break;
             }
         }
     }
 
+    function updateDestinationUi(selectedOption) {
+        const destName = selectedOption.value;
+        
+        // Highlight active popular chip if matched
+        document.querySelectorAll(".dest-chip").forEach(chip => {
+            if (chip.getAttribute("data-dest").toLowerCase() === destName.toLowerCase()) {
+                chip.classList.add("active");
+            } else {
+                chip.classList.remove("active");
+            }
+        });
+
+        // Update dynamic budget tier labels if available on option datasets
+        if (selectedOption.dataset.budgetLow) {
+            const lowVal = parseInt(selectedOption.dataset.budgetLow).toLocaleString("en-IN");
+            const medVal = parseInt(selectedOption.dataset.budgetMed).toLocaleString("en-IN");
+            const highVal = parseInt(selectedOption.dataset.budgetHigh).toLocaleString("en-IN");
+
+            const lblLow = document.getElementById("budgetLabelLow");
+            const lblMed = document.getElementById("budgetLabelMed");
+            const lblHigh = document.getElementById("budgetLabelHigh");
+
+            if (lblLow) lblLow.innerHTML = `&#8377;${lowVal} <small class="text-muted fw-normal" style="font-size: 0.75rem;">/ day</small>`;
+            if (lblMed) lblMed.innerHTML = `&#8377;${medVal} <small class="text-muted fw-normal" style="font-size: 0.75rem;">/ day</small>`;
+            if (lblHigh) lblHigh.innerHTML = `&#8377;${highVal}+ <small class="text-muted fw-normal" style="font-size: 0.75rem;">/ day</small>`;
+        }
+    }
+
+    // Dropdown change event
+    document.getElementById("destinationSelect").addEventListener("change", function() {
+        updateDestinationUi(this.options[this.selectedIndex]);
+    });
+
+    // Duration calculation from Date Pickers
     function calculateDurationFromDates() {
         const startInput = document.getElementById("startDate").value;
         const endInput = document.getElementById("endDate").value;
@@ -260,19 +735,30 @@
 
             if (diffDays > 0 && diffDays <= 14) {
                 durationInput.value = diffDays;
-                badge.textContent = `${diffDays} Days / ${diffDays > 1 ? diffDays - 1 : 1} Nights`;
+                badge.innerHTML = `<i class="fa-solid fa-moon text-secondary"></i> ${diffDays} Days / ${diffDays > 1 ? diffDays - 1 : 1} Nights`;
             } else if (diffDays <= 0) {
                 alert("End date must be after or equal to the start date.");
+            } else if (diffDays > 14) {
+                alert("Maximum trip planning duration is currently 14 days.");
             }
         } else {
             const days = parseInt(durationInput.value) || 3;
-            badge.textContent = `${days} Days / ${days > 1 ? days - 1 : 1} Nights`;
+            badge.innerHTML = `<i class="fa-solid fa-moon text-secondary"></i> ${days} Days / ${days > 1 ? days - 1 : 1} Nights`;
         }
     }
 
+    // Manual duration input handler
     document.getElementById("durationInput").addEventListener("input", function() {
         const days = parseInt(this.value) || 1;
         const badge = document.getElementById("durationBadge");
-        badge.textContent = `${days} Days / ${days > 1 ? days - 1 : 1} Nights`;
+        badge.innerHTML = `<i class="fa-solid fa-moon text-secondary"></i> ${days} Days / ${days > 1 ? days - 1 : 1} Nights`;
+    });
+
+    // Initial check on load for prefilled destination
+    document.addEventListener("DOMContentLoaded", () => {
+        const select = document.getElementById("destinationSelect");
+        if (select.selectedIndex > 0) {
+            updateDestinationUi(select.options[select.selectedIndex]);
+        }
     });
 </script>
