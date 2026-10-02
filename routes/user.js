@@ -24,11 +24,7 @@ const Destination = require("../models/destination.js");
 router.get("/", wrapAsync(async (req, res) => {
     const featuredDestinations = await Destination.find({}).sort({ featured: -1, name: 1 }).limit(6);
     res.render("home.ejs", { featuredDestinations });
-}))
-// Home page
-router.get("/", (req, res) => {
-    res.redirect("/listings");
-});
+}));
 
 
 module.exports = router;

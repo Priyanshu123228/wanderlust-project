@@ -21,6 +21,7 @@ function formatCurrency(amount) {
 
 /**
  * Generates a complete, multi-page professional PDF document for a Wanderlust itinerary.
+ * Ultra-clean, concise, and structured so a 3-day trip is strictly 1-2 pages without orphan pages.
  * @param {Object} itinerary - Complete populated Itinerary document
  * @returns {Promise<Buffer>} - Resolved PDF buffer
  */
@@ -29,13 +30,14 @@ function generateItineraryPdf(itinerary) {
         try {
             const doc = new PDFDocument({
                 size: "A4",
-                margins: { top: 40, bottom: 45, left: 40, right: 40 },
+                margins: { top: 25, bottom: 25, left: 30, right: 30 },
                 bufferPages: true,
+                autoFirstPage: true,
                 info: {
                     Title: itinerary.title || "Wanderlust Travel Itinerary",
                     Author: "Wanderlust Travel Platform",
-                    Subject: `Trip Plan for ${itinerary.destinationName || "Destination"}`,
-                    Keywords: "Travel, Itinerary, Vacation, Wanderlust"
+                    Subject: `Trip Plan: ${itinerary.fromLocation?.name || 'Origin'} to ${itinerary.destinationName || 'Destination'}`,
+                    Keywords: "Travel, Itinerary, Vacation, Wanderlust, Trip Plan"
                 }
             });
 
@@ -49,6 +51,7 @@ function generateItineraryPdf(itinerary) {
             const grayColor = "#64748B";    // Slate Muted Gray
             const lightBg = "#F8FAFC";      // Subtle card background
             const borderColor = "#E2E8F0";  // Light border
+            const travelColor = "#0284C7";  // Blue
             const morningColor = "#D97706"; // Amber
             const lunchColor = "#B45309";   // Warm Orange
             const afternoonColor = "#7C3AED";// Purple
@@ -56,176 +59,183 @@ function generateItineraryPdf(itinerary) {
             const dinnerColor = "#1F2937";  // Dark Navy
             const stayColor = "#059669";    // Emerald Green
 
-            const contentWidth = doc.page.width - 80; // 595.28 - 80 = 515.28
+            const contentWidth = doc.page.width - 60; // 595.28 - 60 = 535.28
+            const pageBottomLimit = 740; // Safe height before PDFKit line-wrapper auto-break
 
-            // -------------------------------------------------------------
-            // Helper: Ensure Space on Page or Add New Page
-            // -------------------------------------------------------------
+            function drawPageHeaderSmall() {
+                doc.save();
+                doc.fontSize(7.5).font("Helvetica-Bold").fillColor(primaryColor).text("WANDERLUST", 30, 15, { continued: true, lineBreak: false });
+                doc.font("Helvetica").fillColor(grayColor).text(`  |  ${itinerary.title || "Trip Plan"}`, { lineBreak: false });
+                doc.strokeColor(borderColor).lineWidth(0.5).moveTo(30, 24).lineTo(30 + contentWidth, 24).stroke();
+                doc.restore();
+                doc.y = 28;
+            }
+
             function ensureSpace(heightNeeded) {
-                if (doc.y + heightNeeded > doc.page.height - doc.page.margins.bottom) {
+                if (doc.y + heightNeeded > pageBottomLimit) {
                     doc.addPage();
                     drawPageHeaderSmall();
                 }
             }
 
-            function drawPageHeaderSmall() {
-                doc.save();
-                doc.fontSize(8).fillColor(grayColor).text("WANDERLUST TRAVEL ITINERARY", 40, 20, { align: "left" });
-                doc.fontSize(8).fillColor(primaryColor).text(itinerary.title || "Trip Plan", 40, 20, { align: "right" });
-                doc.strokeColor(borderColor).lineWidth(0.5).moveTo(40, 32).lineTo(40 + contentWidth, 32).stroke();
-                doc.restore();
-                doc.y = 45;
-            }
-
             // =============================================================
-            // 1. TOP HEADER & BRANDING
+            // 1. TOP BRANDING BAR
             // =============================================================
-            // Header accent bar
-            doc.rect(40, 35, 6, 44).fill(primaryColor);
-
-            doc.fontSize(22).font("Helvetica-Bold").fillColor(darkColor).text("WANDERLUST", 54, 37);
-            doc.fontSize(9).font("Helvetica").fillColor(grayColor).text("Curated Smart Travel & Itinerary Platform", 54, 62);
+            doc.rect(30, 22, 4, 24).fill(primaryColor);
+            doc.fontSize(15).font("Helvetica-Bold").fillColor(darkColor).text("WANDERLUST", 40, 22, { lineBreak: false });
+            doc.fontSize(7).font("Helvetica").fillColor(grayColor).text("Smart Travel Discovery & Itinerary Platform", 40, 37, { lineBreak: false });
 
             // Status Badge
             const statusText = (itinerary.status || "Planned Trip").toUpperCase();
-            doc.roundedRect(40 + contentWidth - 100, 42, 100, 22, 11).fillAndStroke("#FEE2E2", primaryColor);
-            doc.fontSize(8).font("Helvetica-Bold").fillColor(primaryColor).text(statusText, 40 + contentWidth - 100, 48, { width: 100, align: "center" });
+            doc.roundedRect(30 + contentWidth - 75, 23, 75, 15, 7.5).fillAndStroke("#FEE2E2", primaryColor);
+            doc.fontSize(6.5).font("Helvetica-Bold").fillColor(primaryColor).text(statusText, 30 + contentWidth - 75, 27, { width: 75, align: "center", lineBreak: false });
 
-            doc.y = 95;
+            doc.y = 50;
 
             // =============================================================
-            // 2. TRIP HERO BANNER
+            // 2. HERO ROUTE BANNER
             // =============================================================
             const bannerY = doc.y;
-            const bannerHeight = 72;
-            doc.roundedRect(40, bannerY, contentWidth, bannerHeight, 8).fill(darkColor);
+            const bannerHeight = 48;
+            doc.roundedRect(30, bannerY, contentWidth, bannerHeight, 4).fill(darkColor);
 
-            doc.fontSize(16).font("Helvetica-Bold").fillColor("#FFFFFF").text(itinerary.title || `${itinerary.durationDays}-Day Trip to ${itinerary.destinationName}`, 55, bannerY + 12, { width: contentWidth - 30 });
-            
-            const destSub = itinerary.destinationName ? `${itinerary.destinationName}, India` : "Featured Destination";
-            doc.fontSize(10).font("Helvetica").fillColor("#CBD5E1").text(destSub, 55, bannerY + 36);
+            // Title
+            doc.fontSize(10.5).font("Helvetica-Bold").fillColor("#FFFFFF").text(itinerary.title || "Wanderlust Travel Itinerary", 40, bannerY + 6, { width: contentWidth - 20, ellipsis: true, lineBreak: false });
 
-            // Tags row inside banner
-            const tagY = bannerY + 52;
-            doc.fontSize(8).font("Helvetica-Bold").fillColor("#FEF08A").text(`${itinerary.durationDays} DAYS`, 55, tagY);
-            doc.fillColor("#FFFFFF").text(`  |  ${itinerary.numTravelers} TRAVELERS  |  ${itinerary.budgetTier} BUDGET`, 95, tagY);
+            // Route: From -> To
+            const fromName = itinerary.fromLocation?.name || "Starting Point";
+            const toName = itinerary.destinationName || "Destination";
+            doc.fontSize(7.5).font("Helvetica-Bold").fillColor("#38BDF8").text("FROM: ", 40, bannerY + 20, { continued: true, lineBreak: false });
+            doc.font("Helvetica").fillColor("#FFFFFF").text(`${fromName}   `, { continued: true, lineBreak: false });
+            doc.font("Helvetica-Bold").fillColor("#F87171").text("TO: ", { continued: true, lineBreak: false });
+            doc.font("Helvetica").fillColor("#FFFFFF").text(`${toName}`, { width: contentWidth - 20, ellipsis: true, lineBreak: false });
 
-            if (itinerary.interests && itinerary.interests.length > 0) {
-                doc.fillColor("#93C5FD").text(`  |  Interests: ${itinerary.interests.join(", ")}`, 235, tagY, { width: contentWidth - 245, ellipsis: true });
-            }
+            // Meta tags row
+            const transport = itinerary.transportMode || "Car";
+            const distanceText = itinerary.travelDistanceKm ? `${itinerary.travelDistanceKm} KM` : "";
+            const durationText = itinerary.travelDurationText ? `${itinerary.travelDurationText}` : "";
+            const dateSpan = (itinerary.startDate && itinerary.endDate) ? `${itinerary.startDate} - ${itinerary.endDate}` : `${itinerary.durationDays} DAYS`;
 
-            doc.y = bannerY + bannerHeight + 16;
+            let metaString = `${itinerary.durationDays} DAYS (${dateSpan})  |  ${transport.toUpperCase()}`;
+            if (distanceText) metaString += `  |  ${distanceText}`;
+            if (durationText) metaString += `  |  EST. TIME: ${durationText.toUpperCase()}`;
+            metaString += `  |  ${itinerary.numTravelers} TRAVELERS  |  ${itinerary.budgetTier} BUDGET`;
+
+            doc.fontSize(6.5).font("Helvetica-Bold").fillColor("#FEF08A").text(metaString, 40, bannerY + 33, { width: contentWidth - 20, ellipsis: true, lineBreak: false });
+
+            doc.y = bannerY + bannerHeight + 5;
 
             // =============================================================
             // 3. BUDGET SUMMARY & COST BREAKDOWN
             // =============================================================
             const budgetY = doc.y;
-            const budgetBoxHeight = 88;
-            doc.roundedRect(40, budgetY, contentWidth, budgetBoxHeight, 8).fillAndStroke(lightBg, borderColor);
+            const budgetHeight = 48;
+            doc.roundedRect(30, budgetY, contentWidth, budgetHeight, 4).fillAndStroke(lightBg, borderColor);
 
-            // Left side: Grand Total
-            doc.fontSize(9).font("Helvetica-Bold").fillColor(primaryColor).text("ESTIMATED TOTAL TRIP COST", 55, budgetY + 12);
-            
+            // Left: Grand Total
+            doc.fontSize(6.5).font("Helvetica-Bold").fillColor(primaryColor).text("ESTIMATED TOTAL BUDGET", 40, budgetY + 6, { lineBreak: false });
             const grandTotal = itinerary.costBreakdown?.grandTotal || 0;
-            doc.fontSize(18).font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(grandTotal), 55, budgetY + 26);
-            
+            doc.fontSize(12).font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(grandTotal), 40, budgetY + 15, { lineBreak: false });
             const perPerson = Math.round(grandTotal / (itinerary.numTravelers || 1));
-            doc.fontSize(8).font("Helvetica").fillColor(grayColor).text(`(${formatCurrency(perPerson)} per traveler)`, 55, budgetY + 48);
+            doc.fontSize(6).font("Helvetica").fillColor(grayColor).text(`(${formatCurrency(perPerson)} per traveler)`, 40, budgetY + 31, { lineBreak: false });
 
-            // Divider inside budget card
-            doc.strokeColor(borderColor).lineWidth(1).moveTo(210, budgetY + 10).lineTo(210, budgetY + budgetBoxHeight - 10).stroke();
+            // Vertical divider
+            doc.strokeColor(borderColor).lineWidth(0.5).moveTo(175, budgetY + 4).lineTo(175, budgetY + budgetHeight - 4).stroke();
 
-            // Right side: Breakdown columns
-            const col1X = 225;
-            const col2X = 370;
-            const rowSpacing = 14;
+            // Right: 2-column breakdown
+            const col1X = 188;
+            const col2X = 350;
+            const rowGap = 11;
 
+            const travelCost = itinerary.costBreakdown?.travelCost || 0;
+            const localTransit = Math.max(0, (itinerary.costBreakdown?.estimatedTransportation || 0) - travelCost);
             const stayCost = itinerary.costBreakdown?.stayTotal || 0;
             const foodCost = itinerary.costBreakdown?.foodTotal || 0;
             const actCost = itinerary.costBreakdown?.activitiesTotal || 0;
             const entryCost = itinerary.costBreakdown?.entryFeesTotal || 0;
-            const transitCost = itinerary.costBreakdown?.estimatedTransportation || 0;
 
-            doc.fontSize(8).font("Helvetica").fillColor(grayColor);
-            doc.text("Accommodation:", col1X, budgetY + 14);
-            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(stayCost), col1X + 80, budgetY + 14);
+            doc.fontSize(6.5).font("Helvetica").fillColor(grayColor);
+            doc.text(`Intercity (${transport}):`, col1X, budgetY + 6, { lineBreak: false });
+            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(travelCost), col1X + 72, budgetY + 6, { lineBreak: false });
 
-            doc.font("Helvetica").fillColor(grayColor).text("Meals & Dining:", col1X, budgetY + 14 + rowSpacing);
-            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(foodCost), col1X + 80, budgetY + 14 + rowSpacing);
+            doc.font("Helvetica").fillColor(grayColor).text("Local Transit:", col1X, budgetY + 6 + rowGap, { lineBreak: false });
+            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(localTransit), col1X + 72, budgetY + 6 + rowGap, { lineBreak: false });
 
-            doc.font("Helvetica").fillColor(grayColor).text("Transit (Est.):", col1X, budgetY + 14 + rowSpacing * 2);
-            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(transitCost), col1X + 80, budgetY + 14 + rowSpacing * 2);
+            doc.font("Helvetica").fillColor(grayColor).text("Accommodation:", col1X, budgetY + 6 + rowGap * 2, { lineBreak: false });
+            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(stayCost), col1X + 72, budgetY + 6 + rowGap * 2, { lineBreak: false });
 
-            doc.font("Helvetica").fillColor(grayColor).text("Activities:", col2X, budgetY + 14);
-            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(actCost), col2X + 75, budgetY + 14);
+            doc.font("Helvetica").fillColor(grayColor).text("Meals & Dining:", col2X, budgetY + 6, { lineBreak: false });
+            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(foodCost), col2X + 65, budgetY + 6, { lineBreak: false });
 
-            doc.font("Helvetica").fillColor(grayColor).text("Entry Fees:", col2X, budgetY + 14 + rowSpacing);
-            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(entryCost), col2X + 75, budgetY + 14 + rowSpacing);
+            doc.font("Helvetica").fillColor(grayColor).text("Activities:", col2X, budgetY + 6 + rowGap, { lineBreak: false });
+            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(actCost), col2X + 65, budgetY + 6 + rowGap, { lineBreak: false });
 
-            doc.y = budgetY + budgetBoxHeight + 16;
+            doc.font("Helvetica").fillColor(grayColor).text("Entry Fees:", col2X, budgetY + 6 + rowGap * 2, { lineBreak: false });
+            doc.font("Helvetica-Bold").fillColor(darkColor).text(formatCurrency(entryCost), col2X + 65, budgetY + 6 + rowGap * 2, { lineBreak: false });
 
-            // Trip Notes (if any)
+            doc.y = budgetY + budgetHeight + 5;
+
+            // Optional Notes
             if (itinerary.customNotes && itinerary.customNotes.trim()) {
                 const notesY = doc.y;
-                doc.roundedRect(40, notesY, contentWidth, 36, 6).fillAndStroke("#FEF3C7", "#FCD34D");
-                doc.fontSize(8).font("Helvetica-Bold").fillColor("#92400E").text("Trip Notes:", 52, notesY + 8);
-                doc.fontSize(8).font("Helvetica").fillColor("#78350F").text(itinerary.customNotes, 105, notesY + 8, { width: contentWidth - 120, height: 22, ellipsis: true });
-                doc.y = notesY + 44;
+                doc.roundedRect(30, notesY, contentWidth, 18, 3).fillAndStroke("#FEF3C7", "#FCD34D");
+                doc.fontSize(6).font("Helvetica-Bold").fillColor("#92400E").text("Trip Notes: ", 38, notesY + 5, { continued: true, lineBreak: false });
+                doc.font("Helvetica").fillColor("#78350F").text(itinerary.customNotes.trim(), { width: contentWidth - 16, ellipsis: true, lineBreak: false });
+                doc.y = notesY + 22;
             }
 
             // =============================================================
             // 4. DAY-BY-DAY SCHEDULE
             // =============================================================
-            doc.fontSize(12).font("Helvetica-Bold").fillColor(darkColor).text("DAY-BY-DAY ITINERARY SCHEDULE", 40, doc.y);
-            doc.strokeColor(primaryColor).lineWidth(1.5).moveTo(40, doc.y + 3).lineTo(120, doc.y + 3).stroke();
-            doc.y += 12;
+            doc.fontSize(8.5).font("Helvetica-Bold").fillColor(darkColor).text("DAY-BY-DAY ITINERARY SCHEDULE", 30, doc.y, { lineBreak: false });
+            doc.strokeColor(primaryColor).lineWidth(1).moveTo(30, doc.y + 11).lineTo(105, doc.y + 11).stroke();
+            doc.y += 15;
 
             const days = itinerary.dailyPlan || [];
 
-            days.forEach((day, index) => {
-                // Ensure room for day header + weather + at least 1 slot (approx 160pt)
-                ensureSpace(160);
+            days.forEach((day) => {
+                const dayBlockHeight = 140;
+                ensureSpace(dayBlockHeight);
 
                 const dayStartY = doc.y;
 
                 // Day Header Bar
-                doc.roundedRect(40, dayStartY, contentWidth, 24, 4).fill(darkColor);
-                doc.fontSize(10).font("Helvetica-Bold").fillColor("#FFFFFF").text(`DAY ${day.dayNumber}: ${day.morning?.title || 'Exploration'} & ${day.afternoon?.title || 'Sightseeing'}`, 50, dayStartY + 7, { width: contentWidth - 20 });
-                doc.y = dayStartY + 28;
+                doc.roundedRect(30, dayStartY, contentWidth, 15, 3).fill(darkColor);
+                const dayHeaderTitle = day.dayNumber === 1 
+                    ? `DAY 1: ${fromName.split(',')[0]} to ${toName} Travel & Welcome`
+                    : `DAY ${day.dayNumber}: ${day.morning?.title || 'Exploration'} & ${day.afternoon?.title || 'Sightseeing'}`;
+                
+                doc.fontSize(7).font("Helvetica-Bold").fillColor("#FFFFFF").text(dayHeaderTitle, 38, dayStartY + 3.5, { width: contentWidth - 16, ellipsis: true, lineBreak: false });
+                doc.y = dayStartY + 17;
 
-                // Day Weather Strip
+                // Weather strip
                 const weatherObj = day.weather;
                 const hasWeather = weatherObj && (weatherObj.available || weatherObj.temperature !== undefined);
 
                 if (hasWeather) {
                     const weatherY = doc.y;
-                    doc.roundedRect(40, weatherY, contentWidth, 24, 4).fillAndStroke("#EFF6FF", "#BFDBFE");
+                    doc.roundedRect(30, weatherY, contentWidth, 13, 2).fillAndStroke("#EFF6FF", "#BFDBFE");
                     
                     const tempText = `${weatherObj.temperature || 20}°C (${weatherObj.condition || 'Clear'})`;
-                    const rainText = (weatherObj.rainProbability !== undefined && weatherObj.rainProbability > 0) ? ` | ${weatherObj.rainProbability}% Rain Chance` : "";
+                    const rainText = (weatherObj.rainProbability !== undefined && weatherObj.rainProbability > 0) ? ` | ${weatherObj.rainProbability}% Rain` : "";
                     const tempRange = (weatherObj.tempMin && weatherObj.tempMax) ? ` | Range: ${weatherObj.tempMin}°C - ${weatherObj.tempMax}°C` : "";
                     const suggestionText = weatherObj.suggestion ? ` - ${weatherObj.suggestion}` : "";
 
-                    doc.fontSize(8).font("Helvetica-Bold").fillColor("#1D4ED8").text("WEATHER FORECAST: ", 50, weatherY + 7);
-                    doc.font("Helvetica").fillColor("#1E40AF").text(`${tempText}${tempRange}${rainText}${suggestionText}`, 145, weatherY + 7, { width: contentWidth - 155, ellipsis: true });
-                    doc.y = weatherY + 28;
-                } else {
-                    const weatherY = doc.y;
-                    doc.roundedRect(40, weatherY, contentWidth, 18, 4).fillAndStroke("#F1F5F9", "#CBD5E1");
-                    doc.fontSize(7.5).font("Helvetica").fillColor(grayColor).text("Weather Forecast: Live weather forecast unavailable for this day.", 50, weatherY + 5);
-                    doc.y = weatherY + 22;
+                    doc.fontSize(5.8).font("Helvetica-Bold").fillColor("#1D4ED8").text("DESTINATION FORECAST: ", 38, weatherY + 2.5, { continued: true, lineBreak: false });
+                    doc.font("Helvetica").fillColor("#1E40AF").text(`${tempText}${tempRange}${rainText}${suggestionText}`, { width: contentWidth - 16, ellipsis: true, lineBreak: false });
+                    doc.y = weatherY + 15;
                 }
 
-                // Slots for the Day
+                // 6 Slots for the Day
                 const slots = [
                     {
-                        slotName: "MORNING",
+                        slotName: day.dayNumber === 1 ? "JOURNEY" : "MORNING",
                         time: day.morning?.time || "09:00 AM - 12:30 PM",
-                        color: morningColor,
+                        color: day.dayNumber === 1 ? travelColor : morningColor,
                         title: day.morning?.title || "Morning Exploration",
                         description: day.morning?.description,
                         location: day.morning?.location,
-                        costInfo: day.morning?.estimatedCost > 0 ? `Entry: ${formatCurrency(day.morning.estimatedCost)}` : "Free Entry"
+                        costInfo: day.morning?.estimatedCost > 0 ? `Entry: ${formatCurrency(day.morning.estimatedCost)}` : (day.dayNumber === 1 ? `Transport: ${transport}` : "Free Entry")
                     },
                     {
                         slotName: "LUNCH",
@@ -274,20 +284,18 @@ function generateItineraryPdf(itinerary) {
                     }
                 ];
 
-                slots.forEach(slot => {
-                    ensureSpace(42);
-
+                slots.forEach((slot) => {
                     const slotY = doc.y;
-                    // Left color indicator bar
-                    doc.rect(40, slotY, 3, 36).fill(slot.color);
+                    const slotHeight = 17;
 
-                    // Badge / Slot time
-                    doc.fontSize(7.5).font("Helvetica-Bold").fillColor(slot.color).text(`${slot.slotName}  •  ${slot.time}`, 48, slotY + 2);
+                    // Left color bar
+                    doc.rect(30, slotY, 2, slotHeight - 1).fill(slot.color);
 
-                    // Title
-                    doc.fontSize(9).font("Helvetica-Bold").fillColor(darkColor).text(slot.title, 48, slotY + 12, { width: contentWidth - 120, ellipsis: true });
+                    // Row 1: Badge + Title
+                    doc.fontSize(5.8).font("Helvetica-Bold").fillColor(slot.color).text(`${slot.slotName} (${slot.time})`, 36, slotY + 1.2, { continued: true, lineBreak: false });
+                    doc.font("Helvetica-Bold").fillColor(darkColor).text(`  •  ${slot.title}`, { width: contentWidth - 10, ellipsis: true, lineBreak: false });
 
-                    // Location & Cost
+                    // Row 2: Location & Cost metadata
                     let metaText = slot.location ? slot.location : "";
                     if (slot.costInfo) {
                         metaText = metaText ? `${metaText}  |  ${slot.costInfo}` : slot.costInfo;
@@ -297,14 +305,13 @@ function generateItineraryPdf(itinerary) {
                     }
 
                     if (metaText) {
-                        doc.fontSize(7.5).font("Helvetica").fillColor(grayColor).text(metaText, 48, slotY + 24, { width: contentWidth - 20, ellipsis: true });
+                        doc.fontSize(5.8).font("Helvetica").fillColor(grayColor).text(metaText, 36, slotY + 8.8, { width: contentWidth - 10, ellipsis: true, lineBreak: false });
                     }
 
-                    doc.y = slotY + 38;
+                    doc.y = slotY + slotHeight;
                 });
 
-                // Spacing after each day
-                doc.y += 10;
+                doc.y += 4; // Spacing after each day
             });
 
             // =============================================================
@@ -316,15 +323,14 @@ function generateItineraryPdf(itinerary) {
             for (let i = 0; i < totalPages; i++) {
                 doc.switchToPage(i);
                 
-                // Draw footer line
-                const footerY = doc.page.height - 30;
-                doc.strokeColor(borderColor).lineWidth(0.5).moveTo(40, footerY).lineTo(40 + contentWidth, footerY).stroke();
+                const footerY = doc.page.height - 18;
+                doc.strokeColor(borderColor).lineWidth(0.5).moveTo(30, footerY).lineTo(30 + contentWidth, footerY).stroke();
 
-                doc.fontSize(8).font("Helvetica").fillColor(grayColor)
-                    .text("Generated by Wanderlust • Explore, Plan, and Experience the World", 40, footerY + 6, { align: "left" });
+                doc.fontSize(6).font("Helvetica").fillColor(grayColor)
+                    .text("Generated by Wanderlust • Explore, Plan, and Experience the World", 30, footerY + 3, { align: "left", lineBreak: false });
 
-                doc.fontSize(8).font("Helvetica-Bold").fillColor(darkColor)
-                    .text(`Page ${i + 1} of ${totalPages}`, 40, footerY + 6, { align: "right" });
+                doc.fontSize(6).font("Helvetica-Bold").fillColor(darkColor)
+                    .text(`Page ${i + 1} of ${totalPages}`, 30, footerY + 3, { align: "right", lineBreak: false });
             }
 
             doc.end();

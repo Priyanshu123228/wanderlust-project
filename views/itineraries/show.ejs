@@ -19,6 +19,7 @@
         background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         color: white;
     }
+    .slot-badge-travel { background-color: #e0f2fe; color: #0369a1; }
     .slot-badge-morning { background-color: #fff3cd; color: #856404; }
     .slot-badge-lunch { background-color: #ffeeba; color: #856404; }
     .slot-badge-afternoon { background-color: #d1ecf1; color: #0c5460; }
@@ -70,7 +71,11 @@
                         <span class="badge bg-success rounded-pill px-3 py-2 mb-2"><i class="fa-solid fa-circle-check me-1"></i><%= itinerary.status || 'Saved Itinerary' %></span>
                     <% } %>
                     <h2 class="fw-bold mb-1 text-white"><%= itinerary.title %></h2>
-                    <p class="mb-2 opacity-90"><i class="fa-solid fa-location-dot me-1 text-warning"></i><%= itinerary.destinationName %></p>
+                    <p class="mb-2 opacity-90 fs-6">
+                        <i class="fa-solid fa-location-arrow text-warning me-1"></i> <strong><%= itinerary.fromLocation?.name || 'Starting Point' %></strong> 
+                        <i class="fa-solid fa-arrow-right-long mx-2 text-light"></i> 
+                        <i class="fa-solid fa-location-dot text-danger me-1"></i> <strong><%= itinerary.destinationName %></strong>
+                    </p>
                 </div>
                 <div class="text-end">
                     <span class="badge bg-light text-dark px-3 py-2 rounded-pill fw-bold"><%= itinerary.budgetTier %> Budget</span>
@@ -78,6 +83,13 @@
             </div>
 
             <div class="d-flex flex-wrap gap-2 mt-2 pt-2 border-top border-light border-opacity-25">
+                <span class="trip-hero-badge"><i class="fa-solid fa-car-side"></i> <%= itinerary.transportMode || 'Car' %></span>
+                <% if(itinerary.travelDistanceKm) { %>
+                    <span class="trip-hero-badge"><i class="fa-solid fa-road"></i> <%= itinerary.travelDistanceKm %> km</span>
+                <% } %>
+                <% if(itinerary.travelDurationText) { %>
+                    <span class="trip-hero-badge"><i class="fa-regular fa-clock"></i> <%= itinerary.travelDurationText %></span>
+                <% } %>
                 <span class="trip-hero-badge"><i class="fa-regular fa-calendar"></i> <%= itinerary.durationDays %> Days</span>
                 <span class="trip-hero-badge"><i class="fa-solid fa-users"></i> <%= itinerary.numTravelers %> Travelers</span>
                 <% if(typeof weather !== 'undefined' && weather && weather.available && weather.current) { %>
@@ -108,12 +120,12 @@
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link rounded-pill px-4 fw-semibold text-secondary" id="map-tab" data-bs-toggle="tab" data-bs-target="#map-pane" type="button" role="tab">
-                    <i class="fa-solid fa-map-location-dot me-1 text-danger"></i> Route Map
+                    <i class="fa-solid fa-map-location-dot me-1 text-danger"></i> Route Map & Directions
                 </button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link rounded-pill px-4 fw-semibold text-secondary" id="weather-tab" data-bs-toggle="tab" data-bs-target="#weather-pane" type="button" role="tab">
-                    <i class="fa-solid fa-cloud-sun me-1 text-warning"></i> Weather
+                    <i class="fa-solid fa-cloud-sun me-1 text-warning"></i> Destination Weather
                 </button>
             </li>
         </ul>
@@ -165,8 +177,12 @@
 
                             <!-- Morning Slot -->
                             <div class="timeline-card pb-4">
-                                <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1"></div>
-                                <span class="badge slot-badge-morning px-2 py-1 rounded-pill small fw-bold">MORNING &bull; <%= day.morning?.time || '09:00 AM - 12:30 PM' %></span>
+                                <div class="position-absolute start-0 translate-middle-x timeline-dot mt-1" style="<%= day.dayNumber === 1 ? 'background-color: #0284c7; box-shadow: 0 0 0 2px #0284c7;' : '' %>"></div>
+                                <% if(day.dayNumber === 1) { %>
+                                    <span class="badge slot-badge-travel px-2 py-1 rounded-pill small fw-bold"><i class="fa-solid fa-car-side me-1"></i>JOURNEY &bull; <%= day.morning?.time || '07:30 AM - 01:00 PM' %></span>
+                                <% } else { %>
+                                    <span class="badge slot-badge-morning px-2 py-1 rounded-pill small fw-bold">MORNING &bull; <%= day.morning?.time || '09:00 AM - 12:30 PM' %></span>
+                                <% } %>
                                 <h6 class="fw-bold text-dark mt-2 mb-1"><%= day.morning?.title || 'Morning Exploration' %></h6>
                                 <p class="text-secondary small mb-1"><%= day.morning?.description || '' %></p>
                                 <div class="small text-muted d-flex justify-content-between align-items-center flex-wrap">
@@ -174,7 +190,7 @@
                                         <i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.morning?.location || itinerary.destinationName %>
                                         <% if(day.morning?.estimatedCost > 0) { %>
                                             &bull; <span class="fw-semibold text-dark">&#8377;<%= day.morning.estimatedCost.toLocaleString("en-IN") %> entry</span>
-                                        <% } else { %>
+                                        <% } else if(day.dayNumber !== 1) { %>
                                             &bull; <span class="badge bg-success-subtle text-success">Free Entry</span>
                                         <% } %>
                                     </span>
@@ -199,7 +215,9 @@
                                 <div class="small text-muted d-flex justify-content-between align-items-center flex-wrap">
                                     <span>
                                         <i class="fa-solid fa-location-dot text-danger me-1"></i><%= day.afternoon?.location || itinerary.destinationName %>
-                                        &bull; <span class="fw-semibold text-dark">&#8377;<%= (day.afternoon?.estimatedCost || 0).toLocaleString("en-IN") %> /person</span>
+                                        <% if(day.afternoon?.estimatedCost > 0) { %>
+                                            &bull; <span class="fw-semibold text-dark">&#8377;<%= (day.afternoon?.estimatedCost || 0).toLocaleString("en-IN") %> /person</span>
+                                        <% } %>
                                     </span>
                                 </div>
                             </div>
@@ -237,15 +255,23 @@
             <!-- 2. Route Map Tab -->
             <div class="tab-pane fade" id="map-pane" role="tabpanel">
                 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Trip Route Map & Points of Interest</h5>
-                    <div id="itinerary-map" class="rounded-4 border" style="height: 420px; width: 100%;"></div>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-0"><i class="fa-solid fa-map-location-dot text-danger me-2"></i>Trip Route Map & Directions</h5>
+                            <small class="text-muted">Origin 📍 <%= itinerary.fromLocation?.name?.split(',')[0] %> &rarr; Destination 📍 <%= itinerary.destinationName %> (<%= itinerary.travelDistanceKm %> km)</small>
+                        </div>
+                        <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fw-semibold">
+                            <i class="fa-solid fa-route text-primary me-1"></i> <%= itinerary.transportMode || 'Car' %> Route
+                        </span>
+                    </div>
+                    <div id="itinerary-map" class="rounded-4 border" style="height: 480px; width: 100%;"></div>
                 </div>
             </div>
 
             <!-- 3. Weather Forecast Tab -->
             <div class="tab-pane fade" id="weather-pane" role="tabpanel">
                 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-cloud-sun text-warning me-2"></i>Destination Weather Forecast</h5>
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-cloud-sun text-warning me-2"></i>Destination Weather Forecast (<%= itinerary.destinationName %>)</h5>
                     <% if(typeof weather !== 'undefined' && weather && weather.available && weather.dailyForecast && weather.dailyForecast.length) { %>
                         <div class="row row-cols-md-3 row-cols-1 g-3">
                             <% for(let df of weather.dailyForecast) { %>
@@ -324,6 +350,17 @@
 
                 <!-- Detailed Breakdown Items -->
                 <div class="d-flex flex-column gap-2 text-white small mb-3">
+                    <% const travelTransit = itinerary.costBreakdown?.travelCost || 0; %>
+                    <% const localTransit = (itinerary.costBreakdown?.estimatedTransportation || 0) - travelTransit; %>
+                    
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fa-solid fa-plane-arrival text-info me-2"></i>Intercity <%= itinerary.transportMode || 'Travel' %> (<%= itinerary.travelDistanceKm %> km)</span>
+                        <strong class="fs-6">&#8377;<%= travelTransit.toLocaleString("en-IN") %></strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span><i class="fa-solid fa-taxi text-light me-2"></i>Estimated Local Transit</span>
+                        <strong class="fs-6">&#8377;<%= Math.max(0, localTransit).toLocaleString("en-IN") %></strong>
+                    </div>
                     <div class="d-flex justify-content-between">
                         <span><i class="fa-solid fa-bed text-warning me-2"></i>Accommodation (<%= itinerary.durationDays > 1 ? itinerary.durationDays - 1 : 1 %> nights)</span>
                         <strong class="fs-6">&#8377;<%= itinerary.costBreakdown.stayTotal.toLocaleString("en-IN") %></strong>
@@ -339,10 +376,6 @@
                     <div class="d-flex justify-content-between">
                         <span><i class="fa-solid fa-ticket text-danger me-2"></i>Attraction Entry Fees</span>
                         <strong class="fs-6">&#8377;<%= itinerary.costBreakdown.entryFeesTotal.toLocaleString("en-IN") %></strong>
-                    </div>
-                    <div class="d-flex justify-content-between">
-                        <span><i class="fa-solid fa-taxi text-light me-2"></i>Estimated Local Transit</span>
-                        <strong class="fs-6">&#8377;<%= itinerary.costBreakdown.estimatedTransportation.toLocaleString("en-IN") %></strong>
                     </div>
                 </div>
             </div>
@@ -457,7 +490,7 @@
                     </div>
                 </div>
 
-                <!-- Web Share API Button (shown dynamically if supported) -->
+                <!-- Web Share API Button -->
                 <div id="nativeShareContainer" class="mt-3 d-none">
                     <button type="button" id="nativeShareBtn" onclick="triggerNativeShare()" class="btn btn-outline-danger rounded-pill w-100 fw-bold py-2">
                         <i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Share via Device Apps
@@ -470,7 +503,10 @@
 
 <script>
     const mapToken = "<%= mapToken || '' %>";
-    const dailyPlan = <%- JSON.stringify(itinerary.dailyPlan) %>;
+    const dailyPlan = <%- JSON.stringify(itinerary.dailyPlan || []) %>;
+    const fromLocation = <%- JSON.stringify(itinerary.fromLocation || { name: 'Origin', coordinates: [76.7794, 30.7333] }) %>;
+    const destCoords = <%- JSON.stringify(itinerary.destination?.geometry?.coordinates || [77.1892, 32.2432]) %>;
+    const routeGeometry = <%- JSON.stringify(itinerary.routeGeometry || null) %>;
 
     // Set Share URL & Channel Links
     const shareUrl = `${window.location.origin}/itinerary/<%= itinerary._id %>/share`;
@@ -547,36 +583,114 @@
     if (mapToken && document.getElementById("itinerary-map")) {
         mapboxgl.accessToken = mapToken;
         
-        let centerCoordinates = [77.1892, 32.2432];
-        if (dailyPlan.length > 0 && dailyPlan[0].morning && dailyPlan[0].morning.coordinates) {
-            centerCoordinates = dailyPlan[0].morning.coordinates;
-        }
+        let centerCoordinates = destCoords || [77.1892, 32.2432];
 
         const map = new mapboxgl.Map({
             container: "itinerary-map",
             style: "mapbox://styles/mapbox/streets-v12",
             center: centerCoordinates,
-            zoom: 11
+            zoom: 7
         });
 
-        dailyPlan.forEach((day) => {
-            if (day.morning && day.morning.coordinates && day.morning.coordinates.length === 2) {
-                new mapboxgl.Marker({ color: "#fe424d" })
-                    .setLngLat(day.morning.coordinates)
-                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>Day ${day.dayNumber} (Morning)</strong><p>${day.morning.title}</p>`))
+        map.on("load", () => {
+            const bounds = new mapboxgl.LngLatBounds();
+
+            // 1. Origin Marker (Green Pin)
+            if (fromLocation && fromLocation.coordinates && fromLocation.coordinates.length === 2) {
+                new mapboxgl.Marker({ color: "#10b981" })
+                    .setLngLat(fromLocation.coordinates)
+                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>📍 Origin (From)</strong><p class="mb-0 text-muted">${fromLocation.name}</p>`))
                     .addTo(map);
+                bounds.extend(fromLocation.coordinates);
             }
-            if (day.afternoon && day.afternoon.coordinates && day.afternoon.coordinates.length === 2) {
-                new mapboxgl.Marker({ color: "#8e44ad" })
-                    .setLngLat(day.afternoon.coordinates)
-                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>Day ${day.dayNumber} (Afternoon)</strong><p>${day.afternoon.title}</p>`))
+
+            // 2. Destination Marker (Red Pin)
+            if (destCoords && destCoords.length === 2) {
+                new mapboxgl.Marker({ color: "#fe424d" })
+                    .setLngLat(destCoords)
+                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<strong>🏁 Destination (To)</strong><p class="mb-0 text-muted"><%= itinerary.destinationName %></p>`))
                     .addTo(map);
+                bounds.extend(destCoords);
+            }
+
+            // 3. Route Line
+            if (routeGeometry && routeGeometry.coordinates && routeGeometry.coordinates.length > 0) {
+                map.addSource("route", {
+                    type: "geojson",
+                    data: {
+                        type: "Feature",
+                        properties: {},
+                        geometry: routeGeometry
+                    }
+                });
+
+                map.addLayer({
+                    id: "route-line",
+                    type: "line",
+                    source: "route",
+                    layout: {
+                        "line-join": "round",
+                        "line-cap": "round"
+                    },
+                    paint: {
+                        "line-color": "#fe424d",
+                        "line-width": 4,
+                        "line-opacity": 0.85
+                    }
+                });
+
+                routeGeometry.coordinates.forEach(coord => bounds.extend(coord));
+            } else if (fromLocation?.coordinates && destCoords) {
+                map.addSource("route", {
+                    type: "geojson",
+                    data: {
+                        type: "Feature",
+                        properties: {},
+                        geometry: {
+                            type: "LineString",
+                            coordinates: [fromLocation.coordinates, destCoords]
+                        }
+                    }
+                });
+
+                map.addLayer({
+                    id: "route-line",
+                    type: "line",
+                    source: "route",
+                    paint: {
+                        "line-color": "#fe424d",
+                        "line-width": 3,
+                        "line-dasharray": [2, 2]
+                    }
+                });
+            }
+
+            // 4. Add markers for daily POIs
+            dailyPlan.forEach((day) => {
+                if (day.morning && day.morning.coordinates && day.morning.coordinates.length === 2 && day.dayNumber > 1) {
+                    new mapboxgl.Marker({ color: "#f59e0b", scale: 0.85 })
+                        .setLngLat(day.morning.coordinates)
+                        .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(`<strong>Day ${day.dayNumber} (Morning)</strong><p>${day.morning.title}</p>`))
+                        .addTo(map);
+                    bounds.extend(day.morning.coordinates);
+                }
+                if (day.afternoon && day.afternoon.coordinates && day.afternoon.coordinates.length === 2) {
+                    new mapboxgl.Marker({ color: "#8e44ad", scale: 0.85 })
+                        .setLngLat(day.afternoon.coordinates)
+                        .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(`<strong>Day ${day.dayNumber} (Afternoon)</strong><p>${day.afternoon.title}</p>`))
+                        .addTo(map);
+                    bounds.extend(day.afternoon.coordinates);
+                }
+            });
+
+            // Fit map
+            if (!bounds.isEmpty()) {
+                map.fitBounds(bounds, { padding: 60, maxZoom: 13 });
             }
         });
 
         map.addControl(new mapboxgl.NavigationControl());
 
-        // Resize map when tab is opened
         const mapTabEl = document.getElementById('map-tab');
         if (mapTabEl) {
             mapTabEl.addEventListener('shown.bs.tab', function () {

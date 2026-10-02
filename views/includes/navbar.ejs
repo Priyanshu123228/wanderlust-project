@@ -153,7 +153,8 @@
 
       <!-- Right User Navigation -->
       <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-1">
-        <% if(currUser){ %>
+        <% const user = (typeof currUser !== "undefined" && currUser) ? currUser : (typeof locals !== "undefined" && locals.currUser ? locals.currUser : null); %>
+        <% if(user){ %>
           <li class="nav-item">
             <a class="nav-link nav-link-custom" href="/itinerary/my-trips">
               <i class="fa-regular fa-bookmark me-1 text-danger"></i>My Trips
@@ -167,7 +168,7 @@
           </a>
         </li>
 
-        <% if(!currUser){ %>
+        <% if(!user){ %>
           <li class="nav-item ms-lg-2">
             <a class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-semibold" href="/login">Login</a>
           </li>
@@ -176,7 +177,7 @@
           </li>
         <% } %>
 
-        <% if(currUser){ %>
+        <% if(user){ %>
           <li class="nav-item ms-lg-2">
             <a class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1" href="/logout">Logout</a>
           </li>

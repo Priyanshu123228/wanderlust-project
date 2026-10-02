@@ -95,6 +95,16 @@ const itinerarySchema = new Schema({
         ref: "User",
         required: true
     },
+    fromLocation: {
+        name: {
+            type: String,
+            default: "Current Location"
+        },
+        coordinates: {
+            type: [Number], // [longitude, latitude]
+            default: [76.7794, 30.7333]
+        }
+    },
     destination: {
         type: Schema.Types.ObjectId,
         ref: "Destination"
@@ -102,6 +112,35 @@ const itinerarySchema = new Schema({
     destinationName: {
         type: String,
         required: true
+    },
+    transportMode: {
+        type: String,
+        enum: ["Car", "Bus", "Train", "Flight"],
+        default: "Car"
+    },
+    travelDistanceKm: {
+        type: Number,
+        default: 0
+    },
+    travelDurationText: {
+        type: String,
+        default: ""
+    },
+    travelCost: {
+        type: Number,
+        default: 0
+    },
+    routeGeometry: {
+        type: Object,
+        default: null
+    },
+    startDate: {
+        type: String,
+        default: ""
+    },
+    endDate: {
+        type: String,
+        default: ""
     },
     durationDays: {
         type: Number,
@@ -135,6 +174,7 @@ const itinerarySchema = new Schema({
         foodTotal: { type: Number, default: 0 },
         activitiesTotal: { type: Number, default: 0 },
         entryFeesTotal: { type: Number, default: 0 },
+        travelCost: { type: Number, default: 0 },
         estimatedTransportation: { type: Number, default: 0 },
         grandTotal: { type: Number, default: 0 }
     },

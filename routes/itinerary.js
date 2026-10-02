@@ -31,6 +31,9 @@ router.post("/:id/remove-item", isLoggedIn, wrapAsync(itineraryController.remove
 // API: Fetch User Trips for Add-to-Trip Modals
 router.get("/api/user-trips", wrapAsync(itineraryController.getUserTripsJson));
 
+// API: Reverse Geocode coordinates to place name
+router.get("/api/reverse-geocode", wrapAsync(itineraryController.reverseGeocodeApi));
+
 // Single Trip View
 router.route("/:id")
     .get(wrapAsync(itineraryController.showItinerary))

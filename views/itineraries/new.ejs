@@ -114,7 +114,7 @@
         box-shadow: 0 0 0 4px rgba(254, 66, 77, 0.12);
     }
 
-    .dest-chip {
+    .dest-chip, .origin-chip {
         display: inline-flex;
         align-items: center;
         gap: 0.35rem;
@@ -130,14 +130,14 @@
         user-select: none;
     }
 
-    .dest-chip:hover {
+    .dest-chip:hover, .origin-chip:hover {
         background-color: #fff1f2;
         border-color: var(--wl-primary-border);
         color: var(--wl-primary);
         transform: translateY(-1px);
     }
 
-    .dest-chip.active {
+    .dest-chip.active, .origin-chip.active {
         background-color: var(--wl-primary);
         border-color: var(--wl-primary);
         color: #ffffff;
@@ -159,6 +159,79 @@
         background-color: #ffffff;
         border-color: var(--wl-primary);
         box-shadow: 0 0 0 3px rgba(254, 66, 77, 0.12);
+    }
+
+    .btn-current-location {
+        border-radius: 0.75rem;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        padding: 0.45rem 0.95rem;
+        transition: all 0.2s ease;
+        border: 1.5px solid #cbd5e1;
+        background-color: #ffffff;
+        color: #334155;
+    }
+
+    .btn-current-location:hover {
+        background-color: #fff1f2;
+        border-color: var(--wl-primary);
+        color: var(--wl-primary);
+    }
+
+    /* Transport Selector Pills */
+    .transport-card-label {
+        display: block;
+        margin-bottom: 0;
+        cursor: pointer;
+        height: 100%;
+    }
+
+    .transport-pill-card {
+        border: 1.5px solid var(--wl-border);
+        border-radius: 0.85rem;
+        padding: 0.75rem 0.6rem;
+        background-color: #ffffff;
+        text-align: center;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+    }
+
+    .transport-pill-card:hover {
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .transport-radio-input:checked + .transport-pill-card {
+        border-color: var(--wl-primary);
+        background-color: var(--wl-primary-subtle);
+        color: var(--wl-primary);
+        box-shadow: 0 6px 16px rgba(254, 66, 77, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .transport-pill-icon {
+        font-size: 1.25rem;
+        color: #64748b;
+        transition: color 0.2s ease;
+    }
+
+    .transport-radio-input:checked + .transport-pill-card .transport-pill-icon {
+        color: var(--wl-primary);
+    }
+
+    .transport-pill-title {
+        font-size: 0.8125rem;
+        font-weight: 700;
+        color: var(--wl-text-main);
+    }
+
+    .transport-radio-input:checked + .transport-pill-card .transport-pill-title {
+        color: var(--wl-primary);
     }
 
     .duration-indicator-pill {
@@ -401,7 +474,7 @@
                 </div>
                 <h1 class="planner-hero-title mb-2">Plan Your Dream Journey</h1>
                 <p class="planner-hero-subtitle">
-                    Select your destination and travel preferences. Our planning engine will assemble an optimized day-by-day itinerary, stay recommendations, and accurate budget breakdown.
+                    Select where you are travelling from, where you want to go, and your travel preferences. Our system will compute the route, travel duration, live weather forecast, and day-wise schedule.
                 </p>
             </div>
 
@@ -409,46 +482,153 @@
             <div class="card planner-main-card p-4 p-md-5">
                 <form action="/itinerary/generate" method="POST" class="needs-validation" id="plannerForm" novalidate>
                     
-                    <!-- SECTION 1: Destination Selection -->
+                    <!-- Hidden Geocoded Coordinates for Starting Location -->
+                    <input type="hidden" name="fromLat" id="fromLat" value="">
+                    <input type="hidden" name="fromLng" id="fromLng" value="">
+
+                    <!-- SECTION 1: Route (From & Destination) -->
                     <div class="planner-section">
-                        <label class="section-title" for="destinationSelect">
+                        <div class="section-title">
                             <span class="section-step-badge">1</span>
-                            Where do you want to go?
-                        </label>
+                            Route & Starting Location
+                        </div>
 
-                        <select name="destinationName" id="destinationSelect" class="form-select custom-select-destination" required>
-                            <option value="">-- Choose or Search a Destination --</option>
-                            <% if(typeof allDestinations !== 'undefined') { %>
-                                <% for(let dest of allDestinations) { %>
-                                    <option 
-                                        value="<%= dest.name %>" 
-                                        data-budget-low="<%= dest.estimatedBudget?.low || 1500 %>"
-                                        data-budget-med="<%= dest.estimatedBudget?.medium || 3500 %>"
-                                        data-budget-high="<%= dest.estimatedBudget?.high || 7500 %>"
-                                        <%= (prefilledDestination && prefilledDestination.toLowerCase() === dest.name.toLowerCase()) ? 'selected' : '' %>
-                                    >
-                                        <%= dest.name %> &bull; <%= dest.location %> (<%= dest.bestTimeToVisit || 'All Year' %>)
-                                    </option>
+                        <!-- 1.1 Starting Location (From) -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                <label class="form-label small fw-bold text-muted mb-0" for="fromLocationInput">
+                                    <i class="fa-solid fa-circle-dot text-primary me-1"></i> From (Starting Location)
+                                </label>
+                                <button type="button" class="btn btn-current-location" id="useLocationBtn" onclick="useCurrentLocation()">
+                                    <i class="fa-solid fa-location-crosshairs text-danger me-1"></i> Use My Current Location
+                                </button>
+                            </div>
+
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 text-muted" style="border-radius: 0.75rem 0 0 0.75rem; border: 1.5px solid var(--wl-border);">
+                                    <i class="fa-solid fa-location-arrow text-danger"></i>
+                                </span>
+                                <input 
+                                    type="text" 
+                                    name="fromName" 
+                                    id="fromLocationInput" 
+                                    class="form-control form-control-modern border-start-0 ps-0" 
+                                    placeholder="e.g. Chandigarh, New Delhi, Mumbai, Bengaluru..." 
+                                    value="Chandigarh"
+                                    style="border-radius: 0 0.75rem 0.75rem 0;"
+                                    required
+                                >
+                            </div>
+
+                            <!-- Geolocation feedback alert (shown dynamically) -->
+                            <div id="locationStatusAlert" class="mt-2 small d-none"></div>
+
+                            <!-- Quick Popular Starting Location Chips -->
+                            <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
+                                <small class="text-muted fw-bold me-1" style="font-size: 0.75rem;">Quick Select:</small>
+                                <span class="origin-chip active" data-origin="Chandigarh" onclick="selectQuickOrigin('Chandigarh', 76.7794, 30.7333)">
+                                    Chandigarh
+                                </span>
+                                <span class="origin-chip" data-origin="New Delhi" onclick="selectQuickOrigin('New Delhi', 77.2090, 28.6139)">
+                                    New Delhi
+                                </span>
+                                <span class="origin-chip" data-origin="Mumbai" onclick="selectQuickOrigin('Mumbai', 72.8777, 19.0760)">
+                                    Mumbai
+                                </span>
+                                <span class="origin-chip" data-origin="Bengaluru" onclick="selectQuickOrigin('Bengaluru', 77.5946, 12.9716)">
+                                    Bengaluru
+                                </span>
+                                <span class="origin-chip" data-origin="Jaipur" onclick="selectQuickOrigin('Jaipur', 75.7873, 26.9124)">
+                                    Jaipur
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 1.2 Destination (To) -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted mb-2" for="destinationSelect">
+                                <i class="fa-solid fa-location-dot text-danger me-1"></i> Destination (Where to?)
+                            </label>
+
+                            <select name="destinationName" id="destinationSelect" class="form-select custom-select-destination" required>
+                                <option value="">-- Choose or Search a Destination --</option>
+                                <% if(typeof allDestinations !== 'undefined') { %>
+                                    <% for(let dest of allDestinations) { %>
+                                        <option 
+                                            value="<%= dest.name %>" 
+                                            data-budget-low="<%= dest.estimatedBudget?.low || 1500 %>"
+                                            data-budget-med="<%= dest.estimatedBudget?.medium || 3500 %>"
+                                            data-budget-high="<%= dest.estimatedBudget?.high || 7500 %>"
+                                            <%= (prefilledDestination && prefilledDestination.toLowerCase() === dest.name.toLowerCase()) ? 'selected' : (dest.name === 'Manali' ? 'selected' : '') %>
+                                        >
+                                            <%= dest.name %> &bull; <%= dest.location %> (<%= dest.bestTimeToVisit || 'All Year' %>)
+                                        </option>
+                                    <% } %>
                                 <% } %>
-                            <% } %>
-                        </select>
-                        <div class="invalid-feedback small mt-1">Please select a destination to continue.</div>
+                            </select>
+                            <div class="invalid-feedback small mt-1">Please select a destination to continue.</div>
 
-                        <!-- Quick Popular Destination Chips -->
-                        <div class="d-flex flex-wrap gap-2 mt-3 align-items-center">
-                            <small class="text-muted fw-bold me-1" style="font-size: 0.78125rem;">Popular:</small>
-                            <span class="dest-chip" data-dest="Manali" onclick="selectQuickDest('Manali')">
-                                <i class="fa-solid fa-mountain text-muted"></i> Manali
-                            </span>
-                            <span class="dest-chip" data-dest="Goa" onclick="selectQuickDest('Goa')">
-                                <i class="fa-solid fa-umbrella-beach text-muted"></i> Goa
-                            </span>
-                            <span class="dest-chip" data-dest="Jaipur" onclick="selectQuickDest('Jaipur')">
-                                <i class="fa-solid fa-chess-rook text-muted"></i> Jaipur
-                            </span>
-                            <span class="dest-chip" data-dest="Shimla" onclick="selectQuickDest('Shimla')">
-                                <i class="fa-solid fa-tree text-muted"></i> Shimla
-                            </span>
+                            <!-- Quick Popular Destination Chips -->
+                            <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
+                                <small class="text-muted fw-bold me-1" style="font-size: 0.75rem;">Popular:</small>
+                                <span class="dest-chip active" data-dest="Manali" onclick="selectQuickDest('Manali')">
+                                    <i class="fa-solid fa-mountain text-muted"></i> Manali
+                                </span>
+                                <span class="dest-chip" data-dest="Goa" onclick="selectQuickDest('Goa')">
+                                    <i class="fa-solid fa-umbrella-beach text-muted"></i> Goa
+                                </span>
+                                <span class="dest-chip" data-dest="Jaipur" onclick="selectQuickDest('Jaipur')">
+                                    <i class="fa-solid fa-chess-rook text-muted"></i> Jaipur
+                                </span>
+                                <span class="dest-chip" data-dest="Shimla" onclick="selectQuickDest('Shimla')">
+                                    <i class="fa-solid fa-tree text-muted"></i> Shimla
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 1.3 Transport Mode Option -->
+                        <div class="mt-4 pt-1">
+                            <label class="form-label small fw-bold text-muted mb-2">
+                                <i class="fa-solid fa-car-side text-secondary me-1"></i> Preferred Transport Option
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-3">
+                                    <label class="transport-card-label" for="transportCar">
+                                        <input type="radio" name="transportMode" value="Car" id="transportCar" class="d-none transport-radio-input" checked>
+                                        <div class="transport-pill-card">
+                                            <i class="fa-solid fa-car transport-pill-icon"></i>
+                                            <span class="transport-pill-title">Car</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-3">
+                                    <label class="transport-card-label" for="transportBus">
+                                        <input type="radio" name="transportMode" value="Bus" id="transportBus" class="d-none transport-radio-input">
+                                        <div class="transport-pill-card">
+                                            <i class="fa-solid fa-bus transport-pill-icon"></i>
+                                            <span class="transport-pill-title">Bus</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-3">
+                                    <label class="transport-card-label" for="transportTrain">
+                                        <input type="radio" name="transportMode" value="Train" id="transportTrain" class="d-none transport-radio-input">
+                                        <div class="transport-pill-card">
+                                            <i class="fa-solid fa-train transport-pill-icon"></i>
+                                            <span class="transport-pill-title">Train</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="col-3">
+                                    <label class="transport-card-label" for="transportFlight">
+                                        <input type="radio" name="transportMode" value="Flight" id="transportFlight" class="d-none transport-radio-input">
+                                        <div class="transport-pill-card">
+                                            <i class="fa-solid fa-plane-departure transport-pill-icon"></i>
+                                            <span class="transport-pill-title">Flight</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -467,10 +647,10 @@
                                 </label>
                                 <div class="row g-2">
                                     <div class="col-6">
-                                        <input type="date" id="startDate" class="form-control form-control-modern" onchange="calculateDurationFromDates()" title="Start Date">
+                                        <input type="date" name="startDate" id="startDate" class="form-control form-control-modern" onchange="calculateDurationFromDates()" title="Start Date">
                                     </div>
                                     <div class="col-6">
-                                        <input type="date" id="endDate" class="form-control form-control-modern" onchange="calculateDurationFromDates()" title="End Date">
+                                        <input type="date" name="endDate" id="endDate" class="form-control form-control-modern" onchange="calculateDurationFromDates()" title="End Date">
                                     </div>
                                 </div>
                             </div>
@@ -623,6 +803,12 @@
                             <div class="col">
                                 <div class="includes-item">
                                     <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
+                                    <span>Origin-to-destination route & travel time</span>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="includes-item">
+                                    <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
                                     <span>Day-by-day morning to evening timeline</span>
                                 </div>
                             </div>
@@ -641,19 +827,13 @@
                             <div class="col">
                                 <div class="includes-item">
                                     <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
-                                    <span>Attractions prioritized by your interests</span>
+                                    <span>Live destination weather & advisory alerts</span>
                                 </div>
                             </div>
                             <div class="col">
                                 <div class="includes-item">
                                     <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
-                                    <span>Live weather forecast & advisory alerts</span>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="includes-item">
-                                    <span class="includes-icon"><i class="fa-solid fa-check"></i></span>
-                                    <span>Complete transparent budget breakdown</span>
+                                    <span>Complete transparent budget & transit breakdown</span>
                                 </div>
                             </div>
                         </div>
@@ -665,7 +845,7 @@
                             <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Smart Itinerary
                         </button>
                         <p class="planner-disclaimer">
-                            Powered by smart itinerary rules, destination data, route planning and budget calculations.
+                            Powered by smart routing engine, destination intelligence, and accurate budget calculations.
                         </p>
                     </div>
                 </form>
@@ -675,6 +855,119 @@
 </div>
 
 <script>
+    // Quick origin city selection
+    function selectQuickOrigin(cityName, lng, lat) {
+        const fromInput = document.getElementById("fromLocationInput");
+        const latInput = document.getElementById("fromLat");
+        const lngInput = document.getElementById("fromLng");
+        const alertBox = document.getElementById("locationStatusAlert");
+
+        fromInput.value = cityName;
+        if (lat && lng) {
+            latInput.value = lat;
+            lngInput.value = lng;
+        } else {
+            latInput.value = "";
+            lngInput.value = "";
+        }
+
+        if (alertBox) {
+            alertBox.className = "mt-2 small d-none";
+        }
+
+        document.querySelectorAll(".origin-chip").forEach(chip => {
+            if (chip.getAttribute("data-origin").toLowerCase() === cityName.toLowerCase()) {
+                chip.classList.add("active");
+            } else {
+                chip.classList.remove("active");
+            }
+        });
+    }
+
+    // Geolocation: "📍 Use My Current Location"
+    function useCurrentLocation() {
+        const btn = document.getElementById("useLocationBtn");
+        const fromInput = document.getElementById("fromLocationInput");
+        const latInput = document.getElementById("fromLat");
+        const lngInput = document.getElementById("fromLng");
+        const alertBox = document.getElementById("locationStatusAlert");
+
+        if (!navigator.geolocation) {
+            alertBox.className = "mt-2 small text-danger";
+            alertBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Geolocation is not supported by your browser. Please enter starting city manually.';
+            return;
+        }
+
+        // Set button loading state
+        const originalBtnHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1 text-danger"></i> Locating...';
+
+        alertBox.className = "mt-2 small text-muted";
+        alertBox.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-1"></i> Requesting location permission from browser...';
+
+        navigator.geolocation.getCurrentPosition(
+            async function (position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                latInput.value = lat;
+                lngInput.value = lng;
+
+                alertBox.className = "mt-2 small text-primary";
+                alertBox.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-1"></i> Resolving place name...';
+
+                try {
+                    const response = await fetch(`/itinerary/api/reverse-geocode?lat=${lat}&lng=${lng}`);
+                    const data = await response.json();
+
+                    if (data && data.success && data.location && data.location.name) {
+                        fromInput.value = data.location.name;
+                        alertBox.className = "mt-2 small text-success fw-semibold";
+                        alertBox.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Location set: ${data.location.name}`;
+                    } else {
+                        fromInput.value = `Current Location (${lat.toFixed(2)}°N, ${lng.toFixed(2)}°E)`;
+                        alertBox.className = "mt-2 small text-success";
+                        alertBox.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Current coordinates detected.';
+                    }
+                } catch (err) {
+                    console.error("Reverse geocoding error:", err);
+                    fromInput.value = `Current Location (${lat.toFixed(2)}°N, ${lng.toFixed(2)}°E)`;
+                    alertBox.className = "mt-2 small text-success";
+                    alertBox.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> Current coordinates set.';
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalBtnHtml;
+                    // Reset active chips
+                    document.querySelectorAll(".origin-chip").forEach(c => c.classList.remove("active"));
+                }
+            },
+            function (error) {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+                latInput.value = "";
+                lngInput.value = "";
+
+                let errMsg = "Unable to retrieve your location. Please enter starting city manually.";
+                if (error.code === error.PERMISSION_DENIED) {
+                    errMsg = "Location permission denied. Please type your starting city manually above.";
+                } else if (error.code === error.POSITION_UNAVAILABLE) {
+                    errMsg = "Location information is unavailable. Please enter starting city manually.";
+                } else if (error.code === error.TIMEOUT) {
+                    errMsg = "Location request timed out. Please enter starting city manually.";
+                }
+
+                alertBox.className = "mt-2 small text-danger";
+                alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation me-1"></i> ${errMsg}`;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            }
+        );
+    }
+
     // Quick destination selection with active chip highlight & dynamic budget updates
     function selectQuickDest(destName) {
         const select = document.getElementById("destinationSelect");
@@ -718,6 +1011,19 @@
     // Dropdown change event
     document.getElementById("destinationSelect").addEventListener("change", function() {
         updateDestinationUi(this.options[this.selectedIndex]);
+    });
+
+    // Reset coordinates if user manually types in the starting location field
+    document.getElementById("fromLocationInput").addEventListener("input", function() {
+        document.getElementById("fromLat").value = "";
+        document.getElementById("fromLng").value = "";
+        document.querySelectorAll(".origin-chip").forEach(chip => {
+            if (chip.getAttribute("data-origin").toLowerCase() === this.value.toLowerCase().trim()) {
+                chip.classList.add("active");
+            } else {
+                chip.classList.remove("active");
+            }
+        });
     });
 
     // Duration calculation from Date Pickers

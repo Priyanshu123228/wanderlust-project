@@ -10,6 +10,8 @@ const { getDestinationWeather } = require("../utils/weatherService.js");
 const { generateItineraryPdf, sanitizeFilename } = require("../utils/tripPdfGenerator.js");
 const mapToken = process.env.MAP_TOKEN;
 
+const { reverseGeocode, forwardGeocode } = require("../utils/routeService.js");
+
 // Render "Plan Your Trip" Generator Form
 module.exports.renderGeneratorForm = async (req, res) => {
     let { destination } = req.query;
@@ -17,9 +19,37 @@ module.exports.renderGeneratorForm = async (req, res) => {
     res.render("itineraries/new.ejs", { allDestinations, prefilledDestination: destination || "" });
 };
 
+// API: Reverse Geocode coordinates to place name
+module.exports.reverseGeocodeApi = async (req, res) => {
+    const { lat, lng } = req.query;
+    if (!lat || !lng) {
+        return res.status(400).json({ success: false, message: "Latitude and Longitude are required." });
+    }
+    try {
+        const result = await reverseGeocode(parseFloat(lng), parseFloat(lat));
+        return res.json({ success: true, location: result });
+    } catch (err) {
+        console.error("Reverse geocoding API error:", err);
+        return res.status(500).json({ success: false, message: "Failed to reverse geocode coordinates." });
+    }
+};
+
 // Generate and Preview Itinerary
 module.exports.generateItinerary = async (req, res) => {
-    const { destinationName, durationDays, numTravelers, budgetTier, interests } = req.body;
+    const {
+        fromName,
+        fromCoordinates,
+        fromLat,
+        fromLng,
+        destinationName,
+        durationDays,
+        numTravelers,
+        budgetTier,
+        interests,
+        transportMode,
+        startDate,
+        endDate
+    } = req.body;
 
     if (!destinationName) {
         req.flash("error", "Please select a destination to generate an itinerary.");
@@ -31,12 +61,25 @@ module.exports.generateItinerary = async (req, res) => {
         interestsArray = Array.isArray(interests) ? interests : [interests];
     }
 
+    // Determine starting coordinates if provided via lat/lng or fromCoordinates
+    let resolvedFromCoords = null;
+    if (fromLat && fromLng && !isNaN(parseFloat(fromLat)) && !isNaN(parseFloat(fromLng))) {
+        resolvedFromCoords = [parseFloat(fromLng), parseFloat(fromLat)];
+    } else if (fromCoordinates) {
+        resolvedFromCoords = fromCoordinates;
+    }
+
     const generatedPlan = await generateSmartItinerary({
+        fromName: fromName || "",
+        fromCoordinates: resolvedFromCoords,
         destinationName,
         durationDays: parseInt(durationDays) || 3,
         numTravelers: parseInt(numTravelers) || 2,
         budgetTier: budgetTier || "MEDIUM",
-        interests: interestsArray
+        interests: interestsArray,
+        transportMode: transportMode || "Car",
+        startDate: startDate || "",
+        endDate: endDate || ""
     });
 
     res.render("itineraries/preview.ejs", { plan: generatedPlan, mapToken });

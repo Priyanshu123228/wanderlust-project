@@ -28,7 +28,8 @@ const itineraryRouter = require("./routes/itinerary.js");
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+app.use(express.json({ limit: "10mb" }));
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
@@ -79,7 +80,7 @@ passport.deserializeUser(User.deserializeUser());
 app.use((req, res, next) => {
     res.locals.success = req.flash("success");
     res.locals.error = req.flash("error");
-    res.locals.currUser = req.user;
+    res.locals.currUser = req.user || null;
     next();
 });
 
@@ -105,6 +106,9 @@ app.use("/listings/:id/reviews", reviewRouter);
 
 app.use("/", userRouter);
 
+// Favicon handler (avoids unnecessary 404 error logs)
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
 app.use((req, res, next) => {
     next(new ExpressError(404, "Page not found"));
 });
@@ -112,14 +116,21 @@ app.use((req, res, next) => {
 
 //error handling middleware
 app.use((err, req, res, next) => {
-
-    console.error(err.stack);
-
     const { statusCode = 500 } = err;
+
+    if (statusCode !== 404) {
+        console.error(err.stack);
+    } else {
+        console.warn(`[404 Not Found] ${req.method} ${req.originalUrl}`);
+    }
 
     if (res.headersSent) {
         return next(err);
     }
+
+    res.locals.currUser = req.user || null;
+    res.locals.success = req.flash ? req.flash("success") : [];
+    res.locals.error = req.flash ? req.flash("error") : [];
 
     res.status(statusCode).render("error.ejs", {
         message: err.message || "Something went wrong!"
